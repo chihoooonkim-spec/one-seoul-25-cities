@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>25/26 Portfolio</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:     #edeae4;
+  --text:   #181614;
+  --muted:  #8a8680;
+  --border: #d0ccc4;
+}
+
+html, body {
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── LANG TOGGLE ─────────────────── */
+.lang-toggle {
+  position: fixed;
+  top: 28px; right: 40px;
+  display: flex;
+  border: 1px solid rgba(24,22,20,0.18);
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 200;
+}
+
+.lang-btn {
+  padding: 5px 11px;
+  font-size: 8.5px;
+  font-family: inherit;
+  font-weight: 400;
+  letter-spacing: 1px;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lang-btn + .lang-btn { border-left: 1px solid rgba(24,22,20,0.18); }
+.lang-btn.active { background: var(--text); color: var(--bg); }
+
+/* ── COVER GRID ──────────────────── */
+.cover {
+  width: 100vw;
+  height: 100vh;
+  padding: 40px 52px 36px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  position: relative;
+  animation: coverIn 0.7s cubic-bezier(0.2,0,0.2,1) both;
+}
+
+@keyframes coverIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── TOP ROW: Numbers ─────────────── */
+.cover-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(24,22,20,0.18);
+  margin-bottom: 0;
+}
+
+.cover-left-num {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  line-height: 0.88;
+}
+
+.num-big {
+  font-size: clamp(88px, 11.5vw, 148px);
+  font-weight: 800;
+  letter-spacing: -5px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.num-slash {
+  font-size: clamp(64px, 8.5vw, 110px);
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: -3px;
+  margin-left: -6px;
+}
+
+.cover-right-num {
+  font-size: clamp(88px, 11.5vw, 148px);
+  font-weight: 300;
+  letter-spacing: -5px;
+  line-height: 0.88;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── MIDDLE ───────────────────────── */
+.cover-mid {
+  display: grid;
+  grid-template-columns: 200px 1fr 220px;
+  gap: 0 44px;
+  padding-top: 26px;
+  align-items: start;
+}
+
+/* Left column */
+.mid-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 2px;
+}
+
+.ml-label {
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.ml-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.ml-role {
+  font-size: 9.5px;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  margin-bottom: 26px;
+}
+
+.ml-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ml-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--text);
+}
+
+.ml-item:first-child { border-top: 1px solid var(--border); }
+
+.ml-item-n {
+  font-size: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  width: 14px;
+  flex-shrink: 0;
+}
+
+/* Center: image */
+.mid-center {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cover-img-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  background: #1a1612;
+}
+
+.cover-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+/* Placeholder when no image */
+.cover-img-placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, #1e1c18 40%, #2c2820 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 20px 24px;
+}
+
+.cover-img-placeholder-text {
+  font-size: clamp(52px, 6vw, 80px);
+  font-weight: 800;
+  color: rgba(255,255,255,0.04);
+  letter-spacing: -3px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.cover-img-caption {
+  font-size: 8px;
+  color: var(--muted);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  margin-top: 10px;
+}
+
+/* Right column */
+.mid-right {
+  padding-top: 2px;
+}
+
+.mr-season {
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.mr-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.mr-desc {
+  font-size: 10.5px;
+  font-weight: 300;
+  color: #5a5652;
+  line-height: 1.9;
+}
+
+/* ── BOTTOM ───────────────────────── */
+.cover-bottom {
+  border-top: 1px solid rgba(24,22,20,0.18);
+  padding-top: 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.cb-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 40px;
+  flex: 1;
+}
+
+.cb-col {
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.85;
+}
+
+.cb-right {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.cover-mark {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  line-height: 1;
+}
+
+.mark-text {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+
+.mark-slash {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: -1px;
+}
+
+.enter-btn {
+  font-size: 8.5px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(24,22,20,0.5);
+  padding-bottom: 2px;
+  padding-left: 0; padding-right: 0;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.enter-btn:hover { opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button class="lang-btn active" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('ko')">KO</button>
+</div>
+
+<div class="cover">
+
+  <!-- TOP -->
+  <div class="cover-top">
+    <div class="cover-left-num">
+      <span class="num-big">25</span><span class="num-slash">/</span>
+    </div>
+    <span class="cover-right-num">26</span>
+  </div>
+
+  <!-- MIDDLE -->
+  <div class="cover-mid">
+
+    <!-- Left info -->
+    <div class="mid-left">
+      <div class="ml-label" data-en="Designer" data-ko="디자이너">Designer</div>
+      <div class="ml-name" id="ml-name">Your Name</div>
+      <div class="ml-role" id="ml-role">Visual / Data / Web</div>
+
+      <div class="ml-list">
+        <div class="ml-item">
+          <span class="ml-item-n">01</span>
+          <span data-en="Visual Identity" data-ko="비주얼 아이덴티티">Visual Identity</span>
+        </div>
+        <div class="ml-item">
+          <span class="ml-item-n">02</span>
+          <span data-en="Data Visualization" data-ko="데이터 시각화">Data Visualization</span>
+        </div>
+        <div class="ml-item">
+          <span class="ml-item-n">03</span>
+          <span data-en="Web & Interaction" data-ko="웹 & 인터랙션">Web & Interaction</span>
+        </div>
+        <div class="ml-item">
+          <span class="ml-item-n">04</span>
+          <span data-en="Print & Editorial" data-ko="인쇄 & 에디토리얼">Print & Editorial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center image -->
+    <div class="mid-center">
+      <div class="cover-img-wrap">
+        <!-- 커버 이미지 추가 시: <img src="assets/cover.jpg" alt="Cover"> -->
+        <div class="cover-img-placeholder">
+          <span class="cover-img-placeholder-text">25/26</span>
+        </div>
+      </div>
+      <div class="cover-img-caption" id="img-caption">2025 — 2026 Season Portfolio</div>
+    </div>
+
+    <!-- Right text -->
+    <div class="mid-right">
+      <div class="mr-season" data-en="Season Portfolio" data-ko="시즌 포트폴리오">Season Portfolio</div>
+      <div class="mr-title" id="mr-title">Selected Works<br>2025–26</div>
+      <div class="mr-desc" id="mr-desc">A collection of design work spanning visual identity, data visualization, and interactive experiences.</div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="cover-bottom">
+    <div class="cb-cols">
+      <div class="cb-col" id="cb1">Visual design practice based in Seoul, working across digital and print media.</div>
+      <div class="cb-col" id="cb2">Focused on systems thinking, editorial precision, and the space where data meets aesthetics.</div>
+    </div>
+    <div class="cb-right">
+      <div class="cover-mark">
+        <span class="mark-text" id="mark">YN</span><span class="mark-slash">/</span>
+      </div>
+      <button class="enter-btn" id="enter-btn" onclick="enter()">Enter Portfolio →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  COVER DATA
+// ═══════════════════════════════════════
+const COVER = {
+  en: {
+    name:    'Your Name',
+    role:    'Visual / Data / Web',
+    caption: '2025 — 2026 Season Portfolio',
+    title:   'Selected Works<br>2025–26',
+    desc:    'A collection of design work spanning visual identity, data visualization, and interactive experiences.',
+    col1:    'Visual design practice based in Seoul, working across digital and print media.',
+    col2:    'Focused on systems thinking, editorial precision, and the space where data meets aesthetics.',
+    enter:   'Enter Portfolio →',
+    mark:    'YN',
+  },
+  ko: {
+    name:    '이름',
+    role:    '비주얼 / 데이터 / 웹',
+    caption: '2025 — 2026 시즌 포트폴리오',
+    title:   '선별된 작업물<br>2025–26',
+    desc:    '비주얼 아이덴티티, 데이터 시각화, 인터랙티브 경험에 걸친 디자인 작업 모음입니다.',
+    col1:    '서울을 기반으로 디지털과 인쇄 매체를 오가며 활동하는 비주얼 디자이너.',
+    col2:    '시스템 사고, 에디토리얼 정밀함, 데이터와 미학이 만나는 지점에 집중합니다.',
+    enter:   '포트폴리오 입장 →',
+    mark:    '이니셜',
+  },
+};
+
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === l);
+  });
+  const t = COVER[l];
+  document.getElementById('ml-name').textContent    = t.name;
+  document.getElementById('ml-role').textContent    = t.role;
+  document.getElementById('img-caption').textContent = t.caption;
+  document.getElementById('mr-title').innerHTML     = t.title;
+  document.getElementById('mr-desc').textContent    = t.desc;
+  document.getElementById('cb1').textContent         = t.col1;
+  document.getElementById('cb2').textContent         = t.col2;
+  document.getElementById('enter-btn').textContent   = t.enter;
+  document.getElementById('mark').textContent        = t.mark;
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = el.dataset[l] || el.dataset.en;
+  });
+}
+
+function enter() {
+  document.body.style.transition = 'opacity 0.45s ease';
+  document.body.style.opacity = '0';
+  setTimeout(() => { window.location.href = 'portfolio.html'; }, 460);
+}
+
+// Keyboard: press Enter or Space to enter portfolio
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') enter();
+});
+</script>
+</body>
+</html>
