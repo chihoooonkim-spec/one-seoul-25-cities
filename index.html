@@ -673,8 +673,8 @@ body > .sidebar, body > .main { border-radius: 2px; }
   letter-spacing: 0.4px;
   min-height: 30px;
   flex-wrap: wrap;
-  gap: 4px 8px;
-  row-gap: 3px;
+  gap: 6px 12px;
+  row-gap: 5px;
 }
 
 .topbar .hl { color: #1a1a1a; font-weight: 500; letter-spacing: 0.2px; font-size: 10.5px; }
@@ -1716,7 +1716,7 @@ body.chord-mode #q-popup-reopen { display: none !important; }
 .tt-fill { height: 100%; border-radius: 1px; }
 
 /* ── 상단 액션 버튼 ── */
-.tb-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; row-gap: 4px; }
+.tb-actions { display: flex; align-items: center; gap: 9px; flex-shrink: 0; flex-wrap: wrap; row-gap: 6px; }
 .view-toggle, .compare-toggle, .tb-btn, .lang-toggle, .export-wrap { flex-shrink: 0; }
 .topbar > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; flex-basis: auto; }
 .topbar .hl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; flex-shrink: 1; }
@@ -2085,7 +2085,7 @@ body.chord-mode #q-popup-reopen { display: none !important; }
   padding-bottom: 5px;
   border-bottom: 1px solid #ece9e1;
 }
-.filter-cat-label:first-child { margin-top: 6px; }
+.filter-cat-label:first-child { margin-top: 24px; }
 
 .tf-btn.active {
   background: #3a3530;
@@ -2111,7 +2111,6 @@ body.chord-mode #q-popup-reopen { display: none !important; }
 .rank-all-btn:hover { color: #1a1a1a !important; }
 .rank-all-btn.on {
   color: #1a1a1a !important;
-  font-weight: 600;
 }
 
 .rank-row {
@@ -2289,9 +2288,7 @@ body.chord-mode #q-popup-reopen { display: none !important; }
     <svg class="intro-tm" id="intro-tm" viewBox="0 0 361.23 361.23" aria-hidden="true"></svg>
     <h1 class="intro-title" id="intro-title">Living, Working, Enjoying in Seoul</h1>
     <ul class="intro-questions" id="intro-questions">
-      <li>서울에서 사람들은 어디에 사는가?</li>
-      <li>서울에서 사람들은 무엇을 하며 사는가?</li>
-      <li>어떻게 사는가?</li>
+      <li>서울에 대해 알아보기</li>
     </ul>
     <div class="intro-cta" id="intro-cta">click anywhere to begin</div>
   </div>
@@ -2301,6 +2298,7 @@ body.chord-mode #q-popup-reopen { display: none !important; }
   <div class="app-brand"><strong data-i18n="brand-strong">서울에서 살고, 일하고, 즐기다</strong></div>
   <div class="app-title" data-i18n="app-title">하나의 서울,<br>25개의 도시</div>
   <div class="app-desc" data-i18n="app-desc">면적 비례 블록과 왜상 통계지도로 서울 25개 자치구를 비교합니다</div>
+  <a class="app-more" href="about.html" data-i18n="about-link">more</a>
 
   <div id="block-controls">
     <!-- 컨트롤 그룹: 모두 해제 + 순위 필터 (필터 레이어 상단 컴팩트) -->
@@ -2336,10 +2334,11 @@ body.chord-mode #q-popup-reopen { display: none !important; }
       <button class="tf-btn" data-type="count" onclick="setTypeFilter('count')" data-i18n="tf-count">수</button>
       <button class="tf-btn" data-type="area" onclick="setTypeFilter('area')" data-i18n="tf-area">면적</button>
     </div>
-    <div id="fbtn-wrap"></div>
 
-    <div class="section-label" data-i18n="sec-legend">범례</div>
+    <div class="section-label" data-i18n="sec-legend">선택된 레이어</div>
     <div id="dot-legend"></div>
+
+    <div id="fbtn-wrap"></div>
   </div>
 
   <div id="scatter-controls" style="display:none">
@@ -3062,9 +3061,9 @@ function toggle(key) {
 
 // ── G: 도트 비 애니메이션 (filter on 시 점이 위에서 떨어져 자리잡음) ──
 const _dotRainStart = {};       // key → 활성화 시점 (performance.now())
-const RAIN_DROP_DUR = 520;      // 한 점이 떨어지는 시간 (ms)
-const RAIN_STAGGER = 9;          // 다음 점까지 간격 (ms)
-const RAIN_DROP_DIST = 80;       // 시작 위치(현재 위치 위쪽) 거리
+const RAIN_DROP_DUR = 850;       // 한 점이 떨어지는 시간 (ms) — 더 부드럽게
+const RAIN_STAGGER = 14;         // 다음 점까지 간격 (ms) — 차분한 리듬
+const RAIN_DROP_DIST = 60;       // 시작 위치(현재 위치 위쪽) 거리 — 짧게 떨어져서 부드러움
 
 let _rainTickRunning = false;
 function startDotRain(key) {
@@ -4138,9 +4137,11 @@ function redrawDots() {
           // 빗방울: 위에서 떨어져 자리잡음
           const rp = getRainProgress(f.key, i);
           if (rp < 0) continue;
-          const eased = 1 - Math.pow(1 - rp, 3);
+          // 부드러운 easeOutQuart — 처음 빠르게, 끝에 사뿐히 내려앉음
+          const eased = 1 - Math.pow(1 - rp, 4);
           const py = finalPy - (1 - eased) * RAIN_DROP_DIST;
-          ctx.globalAlpha = dotAlpha * dim * rp;
+          // 알파는 sqrt 곡선 — 빨리 보이기 시작해 자연스럽게 정착
+          ctx.globalAlpha = dotAlpha * dim * Math.sqrt(rp);
           ctx.fillStyle = (!topNames || isTop)
             ? (i < maleCount ? f.splitColors[0] : f.splitColors[1])
             : '#9a9590';
@@ -4170,9 +4171,11 @@ function redrawDots() {
           // 빗방울: 위에서 떨어져 자리잡음
           const rp = getRainProgress(f.key, i);
           if (rp < 0) continue;
-          const eased = 1 - Math.pow(1 - rp, 3);
+          // 부드러운 easeOutQuart — 처음 빠르게, 끝에 사뿐히 내려앉음
+          const eased = 1 - Math.pow(1 - rp, 4);
           const py = finalPy - (1 - eased) * RAIN_DROP_DIST;
-          ctx.globalAlpha = dotAlpha * dim * rp;
+          // 알파는 sqrt 곡선 — 빨리 보이기 시작해 자연스럽게 정착
+          ctx.globalAlpha = dotAlpha * dim * Math.sqrt(rp);
           ctx.beginPath();
           ctx.arc(px, py, DOT_R, 0, Math.PI * 2);
           ctx.fill();
@@ -5335,7 +5338,7 @@ const I18N = {
     'sec-xaxis': 'X 축', 'sec-yaxis': 'Y 축',
     'rank-all': '전체 보기', 'rank-top': '상위', 'rank-bot': '하위',
     'footer': '셀 크기 = 실제 면적 (km²)<br>점 밀도 = 데이터 밀집도<br><br>출처: 서울 열린데이터광장 외',
-    'about-link': 'About',
+    'about-link': 'more',
     'sec-layer-short': '레이어',
     'topbar-desc': '서울특별시 · 25개 자치구 · 총 605.24 km²',
     'label-empty': '레이어를 선택하세요',
@@ -5371,7 +5374,7 @@ const I18N = {
     'sec-xaxis': 'X Axis', 'sec-yaxis': 'Y Axis',
     'rank-all': 'All', 'rank-top': 'Top', 'rank-bot': 'Bottom',
     'footer': 'Cell = actual area (km²)<br>Dot density = data density<br><br>Source: Seoul Open Data Plaza et al.',
-    'about-link': 'About',
+    'about-link': 'more',
     'sec-layer-short': 'Layers',
     'topbar-desc': 'Seoul · 25 districts · 605.24 km² total',
     'label-empty': 'Select a layer',
@@ -6450,9 +6453,7 @@ function applyIntroLang() {
     titleEl.classList.add('ko');
     qEl.classList.add('ko');
     qEl.innerHTML = `
-      <li>서울에서 사람들은 어디에 사는가?</li>
-      <li>서울에서 사람들은 무엇을 하며 사는가?</li>
-      <li>어떻게 사는가?</li>`;
+      <li>서울에 대해 알아보기</li>`;
     if (ctaEl) {
       ctaEl.textContent = '아무 곳이나 클릭해서 시작';
       ctaEl.classList.add('ko');
@@ -6462,9 +6463,7 @@ function applyIntroLang() {
     titleEl.classList.remove('ko');
     qEl.classList.remove('ko');
     qEl.innerHTML = `
-      <li>Where do people live in Seoul?</li>
-      <li>What do people do for a living in Seoul?</li>
-      <li>How do they live?</li>`;
+      <li>Explore Seoul</li>`;
     if (ctaEl) {
       ctaEl.textContent = 'click anywhere to begin';
       ctaEl.classList.remove('ko');
