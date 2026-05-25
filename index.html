@@ -24,15 +24,264 @@ body {
   background: #eceae5;
   color: #1a1a1a;
   font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  height: 100vh;
-  min-height: 0;
+  min-height: 100vh;
   display: flex;
-  overflow: hidden;
-  /* 미리보기 가장자리에서 살짝 안쪽으로 — 페이지가 숨쉬게 */
+  flex-direction: column;
+  /* 미리보기 가장자리에서 살짝 안쪽으로 */
   padding: 12px;
   gap: 0;
 }
-body > .sidebar, body > .main { border-radius: 2px; }
+.app-frame {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 24px);
+  flex-shrink: 0;
+  gap: 0;
+}
+
+/* ── 트리맵 모드 토글 (실 토지면적 ↔ 데이터 반영) ── */
+.tm-mode-toggle {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0;
+  z-index: 30;
+  background: #fafaf6;
+  border: 1px solid #d8d6d0;
+  border-radius: 3px;
+  padding: 2px;
+}
+.tmm-btn {
+  padding: 6px 11px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 9.5px;
+  letter-spacing: 0.6px;
+  font-weight: 500;
+  color: #6a6660;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+.tmm-btn:hover { color: #1a1a1a; }
+.tmm-btn.active {
+  background: #1a1a1a;
+  color: #f0ede7;
+}
+
+/* ── 그래프 아래 Wall 섹션 ── */
+.wall-inline {
+  margin: 36px 0 0;
+  padding: 60px 32px 80px;
+  background: #eceae5;
+}
+.wall-wrap { max-width: 880px; margin: 0 auto; }
+.wall-kicker {
+  font-size: 9.5px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  font-weight: 500;
+}
+.wall-title {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -1.2px;
+  margin-top: 12px;
+  color: #1a1a1a;
+}
+.wall-title strong { font-weight: 700; }
+.wall-intro {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #6a6660;
+  font-weight: 300;
+  max-width: 540px;
+  line-height: 1.7;
+}
+.wall-form {
+  margin-top: 38px;
+  padding: 24px;
+  background: #f4f3ef;
+  border: 1px solid #d8d6d0;
+  border-radius: 4px;
+}
+.wall-state-row { margin-bottom: 16px; }
+.wall-form-label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.wall-state-display {
+  display: block;
+  font-size: 11px;
+  color: #555;
+  word-break: break-all;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #fff;
+  padding: 8px 11px;
+  border: 1px solid #e4e2dc;
+  border-radius: 2px;
+  line-height: 1.5;
+}
+.wall-state-display.empty {
+  color: #b0aca6;
+  font-style: italic;
+  font-family: inherit;
+}
+.wall-textarea {
+  width: 100%;
+  min-height: 90px;
+  border: 1px solid #d8d6d0;
+  background: #fff;
+  padding: 11px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 300;
+  color: #1a1a1a;
+  resize: vertical;
+  border-radius: 2px;
+  line-height: 1.6;
+}
+.wall-textarea:focus { outline: none; border-color: #1a1a1a; }
+.wall-form-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: center;
+}
+.wall-author {
+  flex: 1;
+  border: 1px solid #d8d6d0;
+  background: #fff;
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #1a1a1a;
+  border-radius: 2px;
+}
+.wall-author:focus { outline: none; border-color: #1a1a1a; }
+.wall-submit {
+  padding: 10px 22px;
+  border: 1px solid #1a1a1a;
+  background: #1a1a1a;
+  color: #f0ede7;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+.wall-submit:hover:not(:disabled) { background: #2a2724; }
+.wall-submit:disabled { opacity: 0.45; cursor: default; }
+.wall-status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #6a6660;
+  min-height: 14px;
+}
+.wall-status.error { color: #b04a3a; }
+.wall-status.success { color: #4a7a3a; }
+
+.wall-list-header {
+  margin-top: 56px;
+  font-size: 9.5px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  font-weight: 500;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d8d6d0;
+}
+.wall-list {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.wall-card {
+  background: #f4f3ef;
+  border: 1px solid #d8d6d0;
+  padding: 20px 20px 16px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.wall-card.mine {
+  border-left: 3px solid #1a1a1a;
+}
+.wall-comment {
+  font-size: 14px;
+  font-weight: 300;
+  color: #2a2724;
+  line-height: 1.65;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.wall-card-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #888;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid #d8d6d0;
+  padding-bottom: 2px;
+  align-self: flex-start;
+}
+.wall-card-link:hover { color: #1a1a1a; border-color: #1a1a1a; }
+.wall-card-meta {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 0.3px;
+}
+.wall-card-author { font-weight: 500; color: #6a6660; }
+.wall-card-edit {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.wall-card-edit:hover { color: #1a1a1a; }
+.wall-empty {
+  padding: 50px 20px;
+  text-align: center;
+  color: #b0aca6;
+  font-size: 13px;
+  font-weight: 300;
+  grid-column: 1/-1;
+}
+@media (max-width: 600px) {
+  .wall-inline { padding: 40px 18px 60px; }
+  .wall-form { padding: 18px; }
+  .wall-form-row { flex-direction: column; align-items: stretch; }
+  .wall-submit { width: 100%; }
+  .wall-list { grid-template-columns: 1fr; }
+}
+body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 .main { min-width: 0; min-height: 0; flex: 1; display: flex; flex-direction: column; }
 
 /* ── 사이드바 ── */
@@ -251,6 +500,12 @@ body > .sidebar, body > .main { border-radius: 2px; }
   flex-direction: column;
   gap: 9px;
 }
+/* 순위 섹션 내부 컨트롤 바 — section-label이 이미 위 라인 제공하므로 중복 제거 */
+#rank-section .controls-bar {
+  border-top: none;
+  border-bottom: none;
+  padding: 10px 0 4px;
+}
 .ctrl-row {
   display: flex;
   align-items: center;
@@ -350,6 +605,31 @@ body > .sidebar, body > .main { border-radius: 2px; }
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+/* 인트로 인사 — 한 번 부드럽게 나타났다 사라짐 */
+.intro-hello {
+  font-family: "Cormorant Garamond", "Cormorant", Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #b0aca6;
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: 32px;
+  height: 18px;
+  animation: introHello 1.6s ease-in-out 0s both;
+}
+.intro-hello.ko {
+  font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  font-style: normal;
+  letter-spacing: 1.4px;
+  font-weight: 300;
+  font-size: 13.5px;
+}
+@keyframes introHello {
+  0%   { opacity: 0; transform: translateY(-3px); }
+  20%  { opacity: 0.85; transform: translateY(0); }
+  70%  { opacity: 0.85; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
 }
 .intro-tm {
   display: block;
@@ -452,6 +732,7 @@ body > .sidebar, body > .main { border-radius: 2px; }
 }
 /* 처음에는 collapsed 상태로 시작, idle 시 자동 펼쳐짐 */
 .q-popup.collapsed { transform: translateX(-50%) translateY(calc(100% - 36px)); }
+.q-popup.dc-hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(12px); }
 .q-popup.auto-shown { animation: qPopupNudge 0.6s ease-out; }
 @keyframes qPopupNudge {
   0% { transform: translateX(-50%) translateY(20px); opacity: 0.6; }
@@ -489,34 +770,31 @@ body > .sidebar, body > .main { border-radius: 2px; }
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px 8px;
+  padding: 9px 14px 8px;
   border-bottom: 1px solid #ece9e1;
   cursor: pointer;
   user-select: none;
 }
 .q-popup-title {
   font-size: 9px;
-  letter-spacing: 2.2px;
+  letter-spacing: 2.4px;
   text-transform: uppercase;
   color: #1a1a1a;
-  font-weight: 700;
-}
-.q-popup-hint {
-  font-size: 10px;
-  font-weight: 300;
-  color: #b0aca6;
-  letter-spacing: 0;
+  font-weight: 600;
   flex: 1;
 }
+.q-popup-hint { display: none; }
 .q-popup-toggle {
   border: none;
   background: transparent;
-  color: #555;
-  font-size: 12px;
+  color: #8a8680;
+  font-size: 13px;
+  line-height: 1;
   cursor: pointer;
   padding: 0 4px;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, color 0.15s;
 }
+.q-popup-toggle:hover { color: #1a1a1a; }
 .q-popup.collapsed .q-popup-toggle { transform: rotate(180deg); }
 .q-popup-close {
   border: none;
@@ -679,6 +957,101 @@ body > .sidebar, body > .main { border-radius: 2px; }
 
 .topbar .hl { color: #1a1a1a; font-weight: 500; letter-spacing: 0.2px; font-size: 10.5px; }
 
+/* ── 인사이트 입력 바 — 활성 필터 있을 때만 노출 ── */
+.insight-bar {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: #f4f3ef;
+  border: 1px solid #d8d6d0;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  padding: 11px 18px;
+  font-family: inherit;
+  font-size: 11.5px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  display: none;
+  white-space: nowrap;
+}
+.insight-bar.visible { display: block; }
+.insight-bar:hover { color: #1a1a1a; border-color: #1a1a1a; box-shadow: 0 4px 22px rgba(0,0,0,0.08); }
+.insight-bar.expanded {
+  width: 460px;
+  max-width: 90%;
+  cursor: default;
+  padding: 18px 18px 14px;
+  white-space: normal;
+}
+.insight-bar.expanded:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); border-color: #d8d6d0; }
+.insight-bar.expanded .ib-prompt { display: none; }
+.insight-bar .ib-form { display: none; }
+.insight-bar.expanded .ib-form { display: block; }
+.ib-form textarea {
+  width: 100%;
+  min-height: 70px;
+  border: 1px solid #d8d6d0;
+  background: #fff;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 300;
+  color: #1a1a1a;
+  resize: vertical;
+  border-radius: 2px;
+  line-height: 1.5;
+}
+.ib-form textarea:focus { outline: none; border-color: #1a1a1a; }
+.ib-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+.ib-row input {
+  flex: 1;
+  border: 1px solid #d8d6d0;
+  background: #fff;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 11.5px;
+  color: #1a1a1a;
+  border-radius: 2px;
+}
+.ib-row input:focus { outline: none; border-color: #1a1a1a; }
+.ib-btn {
+  padding: 8px 14px;
+  border: 1px solid #1a1a1a;
+  background: #1a1a1a;
+  color: #f0ede7;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.ib-btn:hover:not(:disabled) { background: #2a2724; }
+.ib-btn:disabled { opacity: 0.45; cursor: default; }
+.ib-btn.cancel {
+  background: transparent;
+  color: #888;
+  border-color: #d8d6d0;
+}
+.ib-btn.cancel:hover { color: #1a1a1a; border-color: #1a1a1a; background: transparent; }
+.ib-status {
+  margin-top: 10px;
+  font-size: 11px;
+  min-height: 14px;
+  color: #6a6660;
+}
+.ib-status.error { color: #b04a3a; }
+.ib-status.success { color: #4a7a3a; }
+
 #chart-area {
   flex: 1;
   overflow: hidden;
@@ -702,6 +1075,57 @@ body > .sidebar, body > .main { border-radius: 2px; }
   align-items: stretch;
   justify-content: stretch;
   overflow: hidden;
+}
+/* 트리맵 SVG — 상단 제목(56px)·하단 토글(62px) 공간을 비우고 stretch.
+   canvas(점·면적)는 replaced element라 inset stretch가 안 되므로
+   CSS로 잡지 않고 redrawDots에서 이 SVG 영역에 px로 정확히 맞춘다. */
+#block-pane > svg {
+  top: 56px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 62px !important;
+  width: auto !important;
+  height: auto !important;
+}
+/* block-pane 좌상단 라벨은 제목 오버레이와 중복 → 숨김 */
+#block-pane > .view-pane-label { display: none; }
+
+/* ── 그래프 위 제목 — 선택 항목이 "지도의 이름" 역할 ── */
+.chart-title {
+  position: absolute;
+  top: 12px; left: 0; right: 0;
+  z-index: 25;
+  text-align: center;
+  pointer-events: none;
+  padding: 0 18px;
+}
+.ct-kicker {
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  font-weight: 600;
+}
+.ct-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.3px;
+  margin-top: 4px;
+  line-height: 1.25;
+  transition: opacity 0.3s ease;
+}
+.ct-name .ct-sep { color: #c4bfb6; font-weight: 400; margin: 0 5px; }
+/* 토글과 그래프 사이 얇은 구분선 */
+#block-pane::after {
+  content: '';
+  position: absolute;
+  left: 16px; right: 16px;
+  bottom: 50px;
+  height: 1px;
+  background: #e4e2dc;
+  pointer-events: none;
+  z-index: 20;
 }
 
 .view-pane + .view-pane { border-left: 1px solid #d8d6d0; }
@@ -909,6 +1333,53 @@ body > .sidebar, body > .main { border-radius: 2px; }
   display: block;
   margin-bottom: 6px;
 }
+/* 레이더 프로필 */
+.dc-radar-wrap {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e4e2dc;
+  display: flex;
+  justify-content: center;
+}
+.dc-radar { width: 100%; max-width: 300px; height: auto; display: block; overflow: visible; }
+.dc-radar-grid { fill: none; stroke: #e0ddd6; stroke-width: 0.8; }
+.dc-radar-spoke { stroke: #e0ddd6; stroke-width: 0.8; }
+.dc-radar-area {
+  fill: rgba(26,26,26,0.07);
+  stroke: #1a1a1a;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.dc-radar-pt { fill: #1a1a1a; }
+.dc-radar-axis-lbl {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  fill: #6a6660;
+  font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif;
+}
+.dc-radar-axis-lbl.strong { fill: #1a1a1a; }
+.dc-strength {
+  font-size: 11.5px;
+  color: #2a2724;
+  line-height: 1.6;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e4e2dc;
+  letter-spacing: -0.1px;
+}
+.dc-strength strong { font-weight: 600; color: #1a1a1a; }
+.dc-strength .dc-chip {
+  display: inline-block;
+  background: #1a1a1a;
+  color: #f4f3ef;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-right: 4px;
+}
 /* Chord (흐름) 뷰 */
 .chord-empty {
   position: absolute;
@@ -1012,13 +1483,11 @@ body > .sidebar, body > .main { border-radius: 2px; }
 }
 .ch-bounds { font-size: 9px; color: #999; letter-spacing: 1px; flex-shrink: 0; }
 /* 흐름 모드: 사이드바에서 흐름과 무관한 섹션 숨김 + q-popup도 숨김 */
-body.chord-mode .controls-bar,
-body.chord-mode #fbtn-wrap,
-body.chord-mode .section-label,
-body.chord-mode .type-filter,
-body.chord-mode #dot-legend,
+body.chord-mode #block-controls,
+body.chord-mode #scatter-controls,
 body.chord-mode #q-popup,
 body.chord-mode #q-popup-reopen { display: none !important; }
+body.chord-mode #chord-controls { display: block !important; }
 .chord-hour-controls { z-index: 820; }
 /* 트리맵·지도 하단 연도 슬라이더 (인구 시계열용) */
 .year-slider-strip {
@@ -1796,7 +2265,7 @@ body.chord-mode #q-popup-reopen { display: none !important; }
 
 /* ── 스냅샷 드로어 ── */
 .stamp-drawer {
-  position: absolute;
+  position: fixed;
   bottom: 0; left: 0; right: 0;
   background: #f4f3ef;
   border-top: 1px solid #d0cdc7;
@@ -2285,15 +2754,20 @@ body.chord-mode #q-popup-reopen { display: none !important; }
 <!-- 인트로 / 로딩 오버레이 -->
 <div class="intro-overlay" id="intro-overlay" onclick="startAtlas()" role="button" tabindex="0">
   <div class="intro-stage">
+    <div class="intro-hello" id="intro-hello">안녕하세요</div>
     <svg class="intro-tm" id="intro-tm" viewBox="0 0 361.23 361.23" aria-hidden="true"></svg>
     <h1 class="intro-title" id="intro-title">Living, Working, Enjoying in Seoul</h1>
     <ul class="intro-questions" id="intro-questions">
-      <li>서울에 대해 알아보기</li>
+      <li>서울의 사람들은,</li>
+      <li>어디에서 사는가?</li>
+      <li>어떻게 일을 하는가?</li>
+      <li>어떻게 휴식을 취하는가?</li>
     </ul>
     <div class="intro-cta" id="intro-cta">click anywhere to begin</div>
   </div>
 </div>
 
+<div class="app-frame">
 <aside class="sidebar">
   <div class="app-brand"><strong data-i18n="brand-strong">서울에서 살고, 일하고, 즐기다</strong></div>
   <div class="app-title" data-i18n="app-title">하나의 서울,<br>25개의 도시</div>
@@ -2301,42 +2775,44 @@ body.chord-mode #q-popup-reopen { display: none !important; }
   <a class="app-more" href="about.html" data-i18n="about-link">more</a>
 
   <div id="block-controls">
-    <!-- 컨트롤 그룹: 모두 해제 + 순위 필터 (필터 레이어 상단 컴팩트) -->
-    <div class="controls-bar">
-      <div class="ctrl-row ctrl-rank">
-        <span class="ctrl-rank-lbl" data-i18n="sec-rank">순위</span>
-        <button class="rank-all-btn on" id="rank-all" onclick="setRank(0,'top')" data-i18n="rank-all">전체</button>
-      </div>
-      <div class="ctrl-row rank-row">
-        <span class="rank-dir-lbl" data-i18n="rank-top">상위</span>
-        <button class="topn-btn" data-n="1" data-dir="top" onclick="setRank(1,'top')">1</button>
-        <button class="topn-btn" data-n="3" data-dir="top" onclick="setRank(3,'top')">3</button>
-        <button class="topn-btn" data-n="5" data-dir="top" onclick="setRank(5,'top')">5</button>
-      </div>
-      <div class="ctrl-row rank-row">
-        <span class="rank-dir-lbl" data-i18n="rank-bot">하위</span>
-        <button class="topn-btn" data-n="1" data-dir="bot" onclick="setRank(1,'bot')">1</button>
-        <button class="topn-btn" data-n="3" data-dir="bot" onclick="setRank(3,'bot')">3</button>
-        <button class="topn-btn" data-n="5" data-dir="bot" onclick="setRank(5,'bot')">5</button>
-      </div>
-      <div id="topn-stats"></div>
-    </div>
-
-    <div class="section-label section-label-with-clear">
-      <span data-i18n="sec-layer">데이터 레이어</span>
-      <button class="clear-all-btn" id="clear-all-btn" onclick="clearAllFilters()" disabled>
-        <span data-i18n="clear-all">모두 해제</span>
-        <span class="cab-count" id="clear-all-count">0</span>
-      </button>
-    </div>
+    <div class="section-label" data-i18n="sec-layer">필터</div>
     <div class="type-filter">
       <button class="tf-btn active" data-type="all" onclick="setTypeFilter('all')" data-i18n="tf-all">전체</button>
       <button class="tf-btn" data-type="count" onclick="setTypeFilter('count')" data-i18n="tf-count">수</button>
       <button class="tf-btn" data-type="area" onclick="setTypeFilter('area')" data-i18n="tf-area">면적</button>
     </div>
 
-    <div class="section-label" data-i18n="sec-legend">선택된 레이어</div>
+    <div class="section-label section-label-with-clear">
+      <span data-i18n="sec-legend">선택된 레이어</span>
+      <button class="clear-all-btn" id="clear-all-btn" onclick="clearAllFilters()" disabled>
+        <span data-i18n="clear-all">모두 해제</span>
+        <span class="cab-count" id="clear-all-count">0</span>
+      </button>
+    </div>
     <div id="dot-legend"></div>
+
+    <!-- 순위 — 활성 레이어가 있을 때만 표시 -->
+    <div id="rank-section" style="display:none">
+      <div class="section-label section-label-with-clear">
+        <span data-i18n="sec-rank">순위</span>
+        <button class="rank-all-btn on" id="rank-all" onclick="setRank(0,'top')" data-i18n="rank-all">전체</button>
+      </div>
+      <div class="controls-bar">
+        <div class="ctrl-row rank-row">
+          <span class="rank-dir-lbl" data-i18n="rank-top">상위</span>
+          <button class="topn-btn" data-n="1" data-dir="top" onclick="setRank(1,'top')">1</button>
+          <button class="topn-btn" data-n="3" data-dir="top" onclick="setRank(3,'top')">3</button>
+          <button class="topn-btn" data-n="5" data-dir="top" onclick="setRank(5,'top')">5</button>
+        </div>
+        <div class="ctrl-row rank-row">
+          <span class="rank-dir-lbl" data-i18n="rank-bot">하위</span>
+          <button class="topn-btn" data-n="1" data-dir="bot" onclick="setRank(1,'bot')">1</button>
+          <button class="topn-btn" data-n="3" data-dir="bot" onclick="setRank(3,'bot')">3</button>
+          <button class="topn-btn" data-n="5" data-dir="bot" onclick="setRank(5,'bot')">5</button>
+        </div>
+        <div id="topn-stats"></div>
+      </div>
+    </div>
 
     <div id="fbtn-wrap"></div>
   </div>
@@ -2358,10 +2834,21 @@ body.chord-mode #q-popup-reopen { display: none !important; }
     <div id="scatter-legend"></div>
   </div>
 
+  <!-- 흐름 모드: 사이드바 컨트롤 — 통근 흐름 단일 항목 -->
+  <div id="chord-controls" style="display:none">
+    <div class="section-label">흐름</div>
+    <div class="filter-cat-label" style="margin-top:12px">교통 · 이동</div>
+    <div class="filter-btn on" style="cursor:default" aria-pressed="true">
+      <span class="fdot" style="background:#5a8aaa"></span>
+      <span class="flabel-text">통근 흐름</span>
+    </div>
+  </div>
+
   <div class="footer-hint" data-i18n="footer">
     셀 크기 = 실제 면적 (km²)<br>
-    점 밀도 = 데이터 밀집도<br><br>
-    출처: 서울 열린데이터광장 외
+    점 밀도 = 데이터 밀집도<br>
+    출처: 서울 열린데이터광장 외<br><br>
+    문제가 있을시 <a href="mailto:chihoooonkim@gmail.com" style="color:inherit;text-decoration:underline">chihoooonkim@gmail.com</a> 으로 보내주세요
   </div>
 </aside>
 
@@ -2396,8 +2883,16 @@ body.chord-mode #q-popup-reopen { display: none !important; }
     </div>
   </div>
   <div id="chart-area">
+    <div class="chart-title" id="chart-title">
+      <div class="ct-kicker">ONE SEOUL · 25 CITIES</div>
+      <div class="ct-name" id="ct-name">서울 25개 자치구</div>
+    </div>
     <div class="view-pane" id="block-pane">
       <div class="view-pane-label" data-i18n="pane-block">면적 비례 트리맵</div>
+      <div class="tm-mode-toggle" id="tm-mode-toggle">
+        <button class="tmm-btn active" data-mode="area" onclick="setTreemapMode('area')" data-i18n="tm-area">실 토지면적</button>
+        <button class="tmm-btn" data-mode="data" onclick="setTreemapMode('data')" data-i18n="tm-data">데이터 반영</button>
+      </div>
       <div class="view-pane-foot" data-i18n="seoul-total">서울특별시 총면적 605.24 km²</div>
     </div>
     <div class="view-pane" id="carto-pane" style="display:none">
@@ -2417,15 +2912,14 @@ body.chord-mode #q-popup-reopen { display: none !important; }
 
   <!-- 시작 질문 — 하단 고정 팝업 -->
   <div class="q-popup" id="q-popup">
-    <div class="q-popup-head">
-      <span class="q-popup-title" data-i18n="sec-questions">시작 질문</span>
-      <span class="q-popup-hint" data-i18n="q-hint">— 클릭하면 관련 레이어가 켜집니다</span>
-      <button class="q-popup-toggle" id="q-popup-toggle" onclick="toggleQuestionsPopup()" aria-label="toggle">▾</button>
-      <button class="q-popup-close" id="q-popup-close" onclick="closeQuestionsPopup()" aria-label="close" title="팝업 닫기">×</button>
+    <div class="q-popup-head" onclick="toggleQuestionsPopup()">
+      <span class="q-popup-title" data-i18n="sec-questions">어디서부터 볼까</span>
+      <button class="q-popup-toggle" id="q-popup-toggle" onclick="event.stopPropagation();toggleQuestionsPopup()" aria-label="toggle">⌃</button>
+      <button class="q-popup-close" id="q-popup-close" onclick="event.stopPropagation();closeQuestionsPopup()" aria-label="close" title="팝업 닫기">×</button>
     </div>
     <div class="q-popup-list" id="q-list"></div>
   </div>
-  <button class="q-popup-reopen" id="q-popup-reopen" onclick="openQuestionsPopup()" aria-label="reopen questions">시작 질문 ▴</button>
+  <button class="q-popup-reopen" id="q-popup-reopen" onclick="openQuestionsPopup()" aria-label="reopen questions" data-i18n="reopen-q">어디서부터 볼까</button>
   </div>
 
 
@@ -2443,6 +2937,7 @@ body.chord-mode #q-popup-reopen { display: none !important; }
     </div>
   </div>
 </main>
+</div><!-- /.app-frame -->
 
 <div class="cmp-modal" id="cmp-modal">
   <div class="cmp-modal-head">
@@ -3056,6 +3551,10 @@ function toggle(key) {
   updateTopNStats();
   // 새로 켰을 때만 도트 비 애니메이션 (G)
   if (!wasOn) startDotRain(key);
+  // 트리맵 데이터 비례 모드면 셀 크기를 새 값으로 다시 계산
+  if (window.treemapMode === 'data' && viewMode === 'block') {
+    buildViz();
+  }
   redrawDots();
 }
 
@@ -3066,31 +3565,373 @@ const RAIN_STAGGER = 14;         // 다음 점까지 간격 (ms) — 차분한 �
 const RAIN_DROP_DIST = 60;       // 시작 위치(현재 위치 위쪽) 거리 — 짧게 떨어져서 부드러움
 
 let _rainTickRunning = false;
-function startDotRain(key) {
-  _dotRainStart[key] = performance.now();
-  if (_rainTickRunning) return;
-  _rainTickRunning = true;
-  const tick = () => {
-    const now = performance.now();
-    let stillRaining = false;
-    Object.entries(_dotRainStart).forEach(([k, start]) => {
-      // 활성 필터의 도트 수에 따라 끝나는 시점 계산
-      const f = FILTERS.find(x => x.key === k);
-      if (!f) { delete _dotRainStart[k]; return; }
-      const data = GU[0];  // 대표
-      const maxDots = 250;  // 안전 max
-      const total = RAIN_DROP_DUR + maxDots * RAIN_STAGGER;
-      if (now - start < total) stillRaining = true;
-      else delete _dotRainStart[k];
-    });
-    redrawDots();
-    if (stillRaining) requestAnimationFrame(tick);
-    else _rainTickRunning = false;
-  };
-  requestAnimationFrame(tick);
+// ── 그래프 하단 인사이트 입력 바 + 인라인 Wall ──
+const SUPABASE_URL  = 'https://qjjmidlbgkjskwsexvsp.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqam1pZGxiZ2tqc2t3c2V4dnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NTM1ODYsImV4cCI6MjA5MzMyOTU4Nn0.NYmhe9E7Xyot0BqIk0vmeI8kWf8qStUarPCYcML7MAs';
+
+// ── 인라인 Wall: 메인 페이지 그래프 아래 인사이트 모음 ──
+const _WALL_TOKENS_KEY = 'seoul-wall-tokens';
+function _getMyTokens() {
+  try { return JSON.parse(localStorage.getItem(_WALL_TOKENS_KEY) || '{}'); } catch(e) { return {}; }
 }
-// 도트 i의 비 진행도(0~1) — 안 보이면 -1
-function getRainProgress(key, i) {
+function _saveMyToken(id, token) {
+  const t = _getMyTokens();
+  t[id] = token;
+  try { localStorage.setItem(_WALL_TOKENS_KEY, JSON.stringify(t)); } catch(e) {}
+}
+function _genToken() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return 'tok-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+function _getCurrentStateUrl() {
+  const params = new URLSearchParams();
+  if (active.size > 0) params.set('layers', [...active].join(','));
+  const v = (typeof window.viewMode !== 'undefined') ? window.viewMode : 'block';
+  if (v && v !== 'block') params.set('view', v);
+  return 'index.html' + (params.toString() ? '?' + params.toString() : '');
+}
+function refreshWallStateDisplay() {
+  const el = document.getElementById('wall-state-display');
+  if (!el) return;
+  const url = _getCurrentStateUrl();
+  if (active.size > 0) {
+    el.classList.remove('empty');
+    el.textContent = url;
+  } else {
+    el.classList.add('empty');
+    el.textContent = '메인에서 필터를 선택하면 자동으로 채워집니다 — 일반 코멘트도 OK';
+  }
+}
+function _esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+function _formatDate(iso) {
+  try {
+    return new Date(iso).toLocaleDateString('ko-KR', { year:'numeric', month:'short', day:'numeric' });
+  } catch(e) { return ''; }
+}
+
+async function loadWallList() {
+  const listEl = document.getElementById('wall-list');
+  if (!listEl) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/insights?select=id,created_at,state_url,comment,author&order=created_at.desc&limit=100`, {
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+    });
+    if (!res.ok) {
+      listEl.innerHTML = `<div class="wall-empty">불러오기 실패 (${res.status})</div>`;
+      return;
+    }
+    const data = await res.json();
+    if (!data || data.length === 0) {
+      listEl.innerHTML = '<div class="wall-empty">아직 남긴 인사이트가 없어요. 첫 글을 남겨보세요.</div>';
+      return;
+    }
+    const myTokens = _getMyTokens();
+    listEl.innerHTML = '';
+    data.forEach(row => {
+      const isMine = !!myTokens[row.id];
+      const card = document.createElement('div');
+      card.className = 'wall-card' + (isMine ? ' mine' : '');
+      card.dataset.id = row.id;
+      card.innerHTML = `
+        <div class="wall-comment"></div>
+        ${row.state_url ? `<a class="wall-card-link" href="${_esc(row.state_url)}">이 그래프 보기 →</a>` : ''}
+        <div class="wall-card-meta">
+          <span class="wall-card-author"></span>
+          <span class="wall-card-right">
+            ${isMine ? `<button class="wall-card-edit" onclick="editWallCard('${row.id}')">수정</button> · ` : ''}
+            <span>${_formatDate(row.created_at)}</span>
+          </span>
+        </div>
+      `;
+      card.querySelector('.wall-comment').textContent = row.comment;
+      card.querySelector('.wall-card-author').textContent = row.author || '익명';
+      listEl.appendChild(card);
+    });
+  } catch (e) {
+    listEl.innerHTML = `<div class="wall-empty">네트워크 오류</div>`;
+  }
+}
+
+async function submitWallInsight() {
+  const commentEl = document.getElementById('wall-comment');
+  const authorEl  = document.getElementById('wall-author');
+  const statusEl  = document.getElementById('wall-status');
+  const submitEl  = document.getElementById('wall-submit');
+  const comment = commentEl.value.trim();
+  const author  = (authorEl?.value || '').trim() || '익명';
+  if (!comment) {
+    statusEl.textContent = '발견한 내용을 적어주세요.';
+    statusEl.className = 'wall-status error';
+    return;
+  }
+  const stateUrl = _getCurrentStateUrl();
+  const editToken = _genToken();
+  submitEl.disabled = true;
+  statusEl.textContent = '저장 중…';
+  statusEl.className = 'wall-status';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/insights`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ state_url: stateUrl, comment, author, edit_token: editToken })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      statusEl.textContent = '오류: ' + err.slice(0, 140);
+      statusEl.className = 'wall-status error';
+      submitEl.disabled = false;
+      return;
+    }
+    const inserted = await res.json();
+    if (inserted && inserted[0] && inserted[0].id) {
+      _saveMyToken(inserted[0].id, editToken);
+    }
+    statusEl.textContent = '✓ 남겼습니다';
+    statusEl.className = 'wall-status success';
+    commentEl.value = '';
+    submitEl.disabled = false;
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    loadWallList();
+  } catch (e) {
+    statusEl.textContent = '네트워크 오류';
+    statusEl.className = 'wall-status error';
+    submitEl.disabled = false;
+  }
+}
+
+async function editWallCard(id) {
+  const card = document.querySelector(`.wall-card[data-id="${id}"]`);
+  if (!card || card.classList.contains('editing')) return;
+  card.classList.add('editing');
+  const tokens = _getMyTokens();
+  const token = tokens[id];
+  if (!token) { alert('수정 권한 없음'); return; }
+  const currentText = card.querySelector('.wall-comment').textContent;
+  const currentAuthor = card.querySelector('.wall-card-author').textContent;
+
+  const editArea = document.createElement('div');
+  editArea.innerHTML = `
+    <textarea class="wall-textarea" id="edit-comment-${id}" maxlength="500" style="min-height:70px;font-size:13px"></textarea>
+    <div class="wall-form-row" style="margin-top:8px">
+      <input class="wall-author" id="edit-author-${id}" type="text" maxlength="30" value="${_esc(currentAuthor)}">
+      <button class="wall-submit" style="padding:8px 14px;font-size:10px" onclick="saveWallEdit('${id}')">저장</button>
+      <button class="wall-card-edit" style="border:1px solid #d8d6d0;padding:8px 12px;border-radius:2px" onclick="cancelWallEdit('${id}')">취소</button>
+    </div>
+    <div class="wall-status" id="edit-status-${id}"></div>
+  `;
+  card.querySelector('.wall-comment').replaceWith(editArea);
+  document.getElementById(`edit-comment-${id}`).value = currentText;
+}
+function cancelWallEdit(id) { loadWallList(); }
+async function saveWallEdit(id) {
+  const tokens = _getMyTokens();
+  const token = tokens[id];
+  if (!token) return;
+  const newComment = document.getElementById(`edit-comment-${id}`).value.trim();
+  const newAuthor  = document.getElementById(`edit-author-${id}`).value.trim() || '익명';
+  const statusEl = document.getElementById(`edit-status-${id}`);
+  if (!newComment) { statusEl.textContent = '내용이 비어있어요.'; statusEl.className = 'wall-status error'; return; }
+  statusEl.textContent = '저장 중…';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/insights?id=eq.${id}&edit_token=eq.${token}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ comment: newComment, author: newAuthor })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      statusEl.textContent = '오류: ' + err.slice(0, 120);
+      statusEl.className = 'wall-status error';
+      return;
+    }
+    loadWallList();
+  } catch(e) {
+    statusEl.textContent = '네트워크 오류';
+    statusEl.className = 'wall-status error';
+  }
+}
+
+function refreshInsightBar() {
+  const bar = document.getElementById('insight-bar');
+  if (!bar) return;
+  const shouldShow = (typeof active !== 'undefined' && active.size > 0);
+  bar.classList.toggle('visible', shouldShow);
+  // 필터 모두 해제되면 폼도 닫음
+  if (!shouldShow) closeInsightForm();
+}
+function openInsightForm(e) {
+  const bar = document.getElementById('insight-bar');
+  if (!bar) return;
+  if (bar.classList.contains('expanded')) return;
+  bar.classList.add('expanded');
+  const ta = document.getElementById('ib-comment');
+  if (ta) setTimeout(() => ta.focus(), 200);
+}
+function closeInsightForm() {
+  const bar = document.getElementById('insight-bar');
+  if (!bar) return;
+  bar.classList.remove('expanded');
+  const status = document.getElementById('ib-status');
+  if (status) { status.textContent = ''; status.className = 'ib-status'; }
+}
+async function submitInsight() {
+  const commentEl = document.getElementById('ib-comment');
+  const authorEl  = document.getElementById('ib-author');
+  const statusEl  = document.getElementById('ib-status');
+  const submitEl  = document.getElementById('ib-submit');
+  if (!commentEl) return;
+  const comment = commentEl.value.trim();
+  const author  = (authorEl?.value || '').trim() || '익명';
+  if (!comment) {
+    statusEl.textContent = '발견한 내용을 적어주세요.';
+    statusEl.className = 'ib-status error';
+    return;
+  }
+  // 현재 그래프 상태를 URL로 인코딩
+  const params = new URLSearchParams();
+  if (active.size > 0) params.set('layers', [...active].join(','));
+  const v = (typeof window.viewMode !== 'undefined') ? window.viewMode : 'block';
+  if (v && v !== 'block') params.set('view', v);
+  const stateUrl = 'index.html' + (params.toString() ? '?' + params.toString() : '');
+
+  submitEl.disabled = true;
+  statusEl.textContent = '저장 중…';
+  statusEl.className = 'ib-status';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/insights`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ state_url: stateUrl, comment, author })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      statusEl.textContent = '오류: ' + err.slice(0, 120);
+      statusEl.className = 'ib-status error';
+      submitEl.disabled = false;
+      return;
+    }
+    statusEl.innerHTML = '✓ 남겼습니다 — <a href="wall.html" style="color:inherit;text-decoration:underline">wall에서 보기</a>';
+    statusEl.className = 'ib-status success';
+    commentEl.value = '';
+    setTimeout(() => { closeInsightForm(); submitEl.disabled = false; }, 2200);
+  } catch (e) {
+    statusEl.textContent = '네트워크 오류 — 잠시 후 다시 시도';
+    statusEl.className = 'ib-status error';
+    submitEl.disabled = false;
+  }
+}
+
+// ── 버블 뷰 제거됨 — buildBubble은 호출되지 않지만 잔여 참조 보호용 stub ──
+function buildBubble() { /* removed */ }
+
+// ── Wall 공유: 현재 그래프 상태를 URL 파라미터로 인코딩해서 wall.html에 전달 ──
+function shareToWall() {
+  const params = new URLSearchParams();
+  if (active.size > 0) params.set('layers', [...active].join(','));
+  const v = (typeof window.viewMode !== 'undefined') ? window.viewMode : 'block';
+  if (v && v !== 'block') params.set('view', v);
+  const stateUrl = 'index.html' + (params.toString() ? '?' + params.toString() : '');
+  location.href = 'wall.html?from=' + encodeURIComponent(stateUrl);
+}
+
+// 페이지 로드 시 URL ?layers=...&view=... 파라미터 파싱해서 상태 복원
+function applyUrlState() {
+  try {
+    const p = new URLSearchParams(location.search);
+    const layers = p.get('layers');
+    const view = p.get('view');
+    if (layers) {
+      layers.split(',').filter(Boolean).forEach(k => {
+        const f = (typeof FILTERS !== 'undefined') ? FILTERS.find(x => x.key === k) : null;
+        if (f && !f.placeholder) active.add(k);
+      });
+      document.querySelectorAll('.filter-btn[data-key]').forEach(b =>
+        b.classList.toggle('on', active.has(b.dataset.key))
+      );
+      refreshActiveUI();
+      if (typeof updateLegend === 'function') updateLegend();
+      if (typeof redrawDots === 'function') redrawDots();
+    }
+    if (view && ['cartogram','scatter','chord'].includes(view)) {
+      if (typeof setView === 'function') setView(view);
+    }
+  } catch(e) { console.warn('URL state restore failed:', e); }
+}
+
+// 도트 비 애니메이션 — 도트 수가 많을 때 redraw 비용으로 버벅임 → 비활성화
+function startDotRain(key) { /* no-op */ }
+function getRainProgress(key, i) { return 1; }
+
+// ── 🥚 이스터 에그: 인구 수 활성 + 'walk' 입력하면 사람들이 걷는 듯 움직임 ──
+let _walkUntil = 0;
+let _walkBuffer = '';
+let _walkAnimRunning = false;
+function _walkAnimTick() {
+  if (Date.now() < _walkUntil) {
+    if (typeof redrawDots === 'function') redrawDots();
+    requestAnimationFrame(_walkAnimTick);
+  } else {
+    _walkAnimRunning = false;
+    if (typeof redrawDots === 'function') redrawDots();
+  }
+}
+window.addEventListener('keydown', (e) => {
+  const tag = (e.target.tagName || '').toUpperCase();
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  const key = (e.key || '').toLowerCase();
+  if (/^[a-z]$/.test(key)) {
+    _walkBuffer = (_walkBuffer + key).slice(-4);
+    if (_walkBuffer === 'walk' && typeof active !== 'undefined' && active.has('population')) {
+      _walkUntil = Date.now() + 7500;
+      _walkBuffer = '';
+      _showWalkMessage();
+      if (!_walkAnimRunning) {
+        _walkAnimRunning = true;
+        requestAnimationFrame(_walkAnimTick);
+      }
+    }
+  }
+});
+function _showWalkMessage() {
+  let el = document.getElementById('walk-msg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'walk-msg';
+    el.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(26,26,26,0.92);color:#f0ede7;padding:10px 22px;font-size:12px;letter-spacing:1px;border-radius:4px;z-index:9999;font-family:Pretendard,sans-serif;pointer-events:none;opacity:0;transition:opacity 0.5s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = '✻ 사람들이 걷고 있습니다';
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 6500);
+}
+function _walkOffset(key, i) {
+  if (Date.now() >= _walkUntil) return null;
+  if (key !== 'population') return null;
+  const phase = (Date.now() / 220) + i * 0.7;
+  return {
+    dx: Math.sin(phase) * 1.4,
+    dy: Math.cos(phase * 1.3) * 0.9
+  };
+}
+// (이하 미사용 — 보존만)
+function _legacy_getRainProgress(key, i) {
   if (!_dotRainStart[key]) return 1;
   const elapsed = performance.now() - _dotRainStart[key] - i * RAIN_STAGGER;
   if (elapsed < 0) return -1;
@@ -3122,6 +3963,42 @@ function refreshActiveUI() {
   if (cabCount) cabCount.textContent = totalCount;
   if (cabS) cabS.disabled = totalCount === 0;
   if (cabSCount) cabSCount.textContent = totalCount;
+  // 순위 섹션 — 활성 필터가 있을 때만 노출
+  const rankSec = document.getElementById('rank-section');
+  if (rankSec) rankSec.style.display = active.size > 0 ? '' : 'none';
+  // 인사이트 입력 바도 같이 토글
+  if (typeof refreshInsightBar === 'function') refreshInsightBar();
+  // 인라인 wall 상태 표시도 갱신
+  if (typeof refreshWallStateDisplay === 'function') refreshWallStateDisplay();
+  // 그래프 위 제목(선택 항목) 갱신
+  updateChartTitle();
+}
+
+// ── 그래프 위 제목 = "지도의 이름" ──
+// 선택 항목 텍스트 (export·표시 공용)
+function currentTitleText() {
+  const names = [...active].map(k => fLabel(FILTERS.find(f => f.key === k))).filter(Boolean);
+  if (!names.length) return lang === 'en' ? '25 Districts of Seoul' : '서울 25개 자치구';
+  return names.join('  ·  ');
+}
+// 현재 뷰·모드 설명
+function currentViewLabel() {
+  if (viewMode === 'cartogram') return lang === 'en' ? 'Cartogram' : '데이터 비례 지도';
+  if (viewMode === 'scatter')   return lang === 'en' ? 'Scatter plot' : '산점도';
+  if (viewMode === 'chord')     return lang === 'en' ? 'Commute flow' : '통근 흐름';
+  return window.treemapMode === 'data'
+    ? (lang === 'en' ? 'Data-proportional treemap' : '데이터 비례 트리맵')
+    : (lang === 'en' ? 'Area-proportional treemap' : '면적 비례 트리맵');
+}
+function updateChartTitle() {
+  const el = document.getElementById('ct-name');
+  if (!el) return;
+  const names = [...active].map(k => fLabel(FILTERS.find(f => f.key === k))).filter(Boolean);
+  if (!names.length) {
+    el.textContent = lang === 'en' ? '25 Districts of Seoul' : '서울 25개 자치구';
+  } else {
+    el.innerHTML = names.join('<span class="ct-sep">·</span>');
+  }
 }
 
 // 모두 해제 — 활성 레이어 + 산점도 X/Y 축 + 포커스 모두 초기화
@@ -3573,6 +4450,9 @@ function redrawCartogram() {
       sel.select('.carto-shape').attr('fill', '#bdb6a8').attr('opacity', 0.4);
       sel.select('.carto-label').attr('opacity', 0.78).attr('fill', 'rgba(20,20,20,0.82)').attr('font-size', '25px');
       sel.select('.carto-area').attr('opacity', 0.55).attr('fill', 'rgba(20,20,20,0.55)');
+      // 잔재 점·면적 채움 정리
+      sel.select('.carto-dots').selectAll('*').remove();
+      sel.selectAll('.carto-area-fill').remove();
     });
     return;
   }
@@ -3837,9 +4717,51 @@ function svgToCanvas(x, y) {
   return [ox + x * scale, oy + y * scale, scale];
 }
 
+// 트리맵 모드: 'area' (실 토지면적, 기본) | 'data' (선택 필터값에 비례)
+window.treemapMode = window.treemapMode || 'area';
+
+function setTreemapMode(mode) {
+  window.treemapMode = mode;
+  document.querySelectorAll('.tmm-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  // 라벨 업데이트
+  const lbl = document.querySelector('#block-pane .view-pane-label');
+  if (lbl) {
+    lbl.textContent = (mode === 'data')
+      ? '데이터 비례 트리맵 — 선택한 지표의 값으로 셀 크기 결정'
+      : '면적 비례 트리맵 — 실제 자치구 토지면적';
+  }
+  // 다시 그리기
+  buildViz();
+}
+
+// 현재 모드에 맞는 레이아웃 반환
+function getLayoutForCurrentMode() {
+  if (window.treemapMode === 'data') {
+    const driver = focusKey || (active.size ? [...active][active.size - 1] : null);
+    const driverF = driver ? FILTERS.find(f => f.key === driver) : null;
+    if (!driverF) return LAYOUT;
+    // d3.treemap squarified
+    const root = d3.hierarchy({
+      children: GU.map(g => ({ name: g.name, value: Math.max(0.0001, valOf(driverF, g)) }))
+    }).sum(d => d.value || 0).sort((a, b) => b.value - a.value);
+    d3.treemap()
+      .size([980, 980])
+      .padding(2)
+      .round(true)(root);
+    return root.leaves().map(l => ({
+      name: l.data.name,
+      x0: l.x0, y0: l.y0, x1: l.x1, y1: l.y1
+    }));
+  }
+  return LAYOUT;
+}
+
 function buildViz() {
   const guMap = Object.fromEntries(GU.map(g => [g.name, g]));
-  leaves = LAYOUT.map(l => ({ ...l, data: guMap[l.name] || { name: l.name, area: 0 } }));
+  const layout = getLayoutForCurrentMode();
+  leaves = layout.map(l => ({ ...l, data: guMap[l.name] || { name: l.name, area: 0 } }));
 
   svg.attr('viewBox', '0 0 980 980').attr('preserveAspectRatio', 'xMidYMid meet');
   svg.selectAll('*').remove();
@@ -3854,37 +4776,51 @@ function buildViz() {
     .attr('class', 'cell')
     .attr('transform', d => `translate(${d.x0},${d.y0})`)
     .style('cursor', 'pointer')
-    .style('opacity', 0)
     .on('mouseenter', (ev, d) => showTT(ev, d))
     .on('mousemove', moveTT)
     .on('mouseleave', hideTT)
-    .on('click', (ev, d) => openDistrictCard(d.data.name))
-    .style('cursor', 'pointer');
+    .on('click', (ev, d) => openDistrictCard(d.data.name));
 
-  // 마이크로 모션 — 셀이 면적 큰 순서대로 페이드인
-  cells.transition()
-    .delay(d => (orderById.get(d.name) || 0) * 16)
-    .duration(360)
-    .ease(d3.easeCubicOut)
-    .style('opacity', 1);
+  // 셀별 시작 지연 (면적 큰 순서대로) + 차오르는 시간
+  const cellDelay = d => (orderById.get(d.name) || 0) * 18;
+  const RISE_DUR = 620;
 
+  // 배경 — 바닥에서 위로 차오름 (높이 0 → 실제 높이)
   cells.append('rect')
     .attr('class', 'bg-rect')
+    .attr('x', 0)
     .attr('width',  d => d.x1 - d.x0)
-    .attr('height', d => d.y1 - d.y0)
+    .attr('y',      d => d.y1 - d.y0)
+    .attr('height', 0)
     .attr('fill', '#eae8e3')
-    .attr('rx', 2);
+    .attr('rx', 2)
+    .transition()
+      .delay(cellDelay)
+      .duration(RISE_DUR)
+      .ease(d3.easeCubicOut)
+      .attr('y', 0)
+      .attr('height', d => d.y1 - d.y0);
 
-  // 셀 테두리선
+  // 테두리선 — 함께 차오름
   cells.append('rect')
+    .attr('class', 'border-rect')
     .attr('pointer-events', 'none')
+    .attr('x', 0)
     .attr('width',  d => d.x1 - d.x0)
-    .attr('height', d => d.y1 - d.y0)
+    .attr('y',      d => d.y1 - d.y0)
+    .attr('height', 0)
     .attr('fill', 'none')
     .attr('stroke', '#d0cdc7')
     .attr('stroke-width', 0.8)
-    .attr('rx', 2);
+    .attr('rx', 2)
+    .transition()
+      .delay(cellDelay)
+      .duration(RISE_DUR)
+      .ease(d3.easeCubicOut)
+      .attr('y', 0)
+      .attr('height', d => d.y1 - d.y0);
 
+  // 자치구명 — 차오른 뒤 살짝 떠오르며 페이드인
   cells.append('text')
     .attr('class', 'name-txt')
     .attr('pointer-events', 'none')
@@ -3902,10 +4838,16 @@ function buildViz() {
       const m = Math.min(d.x1 - d.x0, d.y1 - d.y0);
       return Math.max(8, Math.min(15, m * 0.19)) + 'px';
     })
+    .style('opacity', 0)
     .text(d => {
       const w = d.x1 - d.x0, h = d.y1 - d.y0;
       return (w < 30 || h < 22) ? '' : d.data.name;
-    });
+    })
+    .transition()
+      .delay(d => cellDelay(d) + RISE_DUR * 0.55)
+      .duration(340)
+      .ease(d3.easeCubicOut)
+      .style('opacity', 1);
 
   cells.append('text')
     .attr('class', 'area-txt')
@@ -3921,10 +4863,15 @@ function buildViz() {
       const m = Math.min(d.x1 - d.x0, d.y1 - d.y0);
       return Math.max(7, Math.min(10, m * 0.12)) + 'px';
     })
+    .style('opacity', 0)
     .text(d => {
       const w = d.x1 - d.x0, h = d.y1 - d.y0;
       return (w < 50 || h < 38) ? '' : d.data.area + 'km²';
-    });
+    })
+    .transition()
+      .delay(d => cellDelay(d) + RISE_DUR * 0.7)
+      .duration(340)
+      .style('opacity', 1);
 
   redrawDots();
 }
@@ -3938,7 +4885,32 @@ function redrawDots() {
     if (isoEl) renderIsoStack(isoEl, false);
   }
   if (!leaves) return;
-  const rect = chartEl.getBoundingClientRect();
+  // 점·면적 canvas를 트리맵 SVG의 실제 표시영역에 정확히 정렬
+  // (canvas는 replaced element라 CSS inset stretch가 안 되므로 px로 직접 맞춘다)
+  const _svgEl = document.querySelector('#block-pane > svg');
+  if (_svgEl) {
+    const sr = _svgEl.getBoundingClientRect();
+    const pr = chartEl.getBoundingClientRect();
+    canvas.style.top    = (sr.top - pr.top) + 'px';
+    canvas.style.left   = (sr.left - pr.left) + 'px';
+    canvas.style.width  = sr.width + 'px';
+    canvas.style.height = sr.height + 'px';
+    canvas.style.right  = 'auto';
+    canvas.style.bottom = 'auto';
+  }
+  // 데이터 반영 모드: 셀 크기가 값을 표현하므로 점/면적은 표시하지 않음
+  if (viewMode === 'block' && window.treemapMode === 'data') {
+    const dpr0 = window.devicePixelRatio || 1;
+    const r0 = canvas.getBoundingClientRect();
+    canvas.width = r0.width * dpr0;
+    canvas.height = r0.height * dpr0;
+    const ctx0 = canvas.getContext('2d');
+    ctx0.scale(dpr0, dpr0);
+    ctx0.clearRect(0, 0, r0.width, r0.height);
+    return;
+  }
+  // 캔버스의 실제 화면 사이즈를 기준으로 (블록 페인은 하단 모드 토글 공간만큼 짧음)
+  const rect = canvas.getBoundingClientRect();
   const W = rect.width, H = rect.height;
 
   // 캔버스 픽셀 크기를 실제 화면 해상도에 맞게
@@ -4139,14 +5111,18 @@ function redrawDots() {
           if (rp < 0) continue;
           // 부드러운 easeOutQuart — 처음 빠르게, 끝에 사뿐히 내려앉음
           const eased = 1 - Math.pow(1 - rp, 4);
-          const py = finalPy - (1 - eased) * RAIN_DROP_DIST;
+          let py = finalPy - (1 - eased) * RAIN_DROP_DIST;
+          let drawPx = px;
+          // 🥚 이스터 에그: walk 모드일 때 인구 점들 흔들림
+          const walk = _walkOffset(f.key, i);
+          if (walk) { drawPx += walk.dx; py += walk.dy; }
           // 알파는 sqrt 곡선 — 빨리 보이기 시작해 자연스럽게 정착
           ctx.globalAlpha = dotAlpha * dim * Math.sqrt(rp);
           ctx.fillStyle = (!topNames || isTop)
             ? (i < maleCount ? f.splitColors[0] : f.splitColors[1])
             : '#9a9590';
           ctx.beginPath();
-          ctx.arc(px, py, DOT_R, 0, Math.PI * 2);
+          ctx.arc(drawPx, py, DOT_R, 0, Math.PI * 2);
           ctx.fill();
         }
         // 셀 하단에 남성/여성 라벨 (stripe 모드에서는 각 줄 하단)
@@ -4173,11 +5149,15 @@ function redrawDots() {
           if (rp < 0) continue;
           // 부드러운 easeOutQuart — 처음 빠르게, 끝에 사뿐히 내려앉음
           const eased = 1 - Math.pow(1 - rp, 4);
-          const py = finalPy - (1 - eased) * RAIN_DROP_DIST;
+          let py = finalPy - (1 - eased) * RAIN_DROP_DIST;
+          let drawPx = px;
+          // 🥚 이스터 에그: walk 모드일 때 인구 점들 흔들림
+          const walk = _walkOffset(f.key, i);
+          if (walk) { drawPx += walk.dx; py += walk.dy; }
           // 알파는 sqrt 곡선 — 빨리 보이기 시작해 자연스럽게 정착
           ctx.globalAlpha = dotAlpha * dim * Math.sqrt(rp);
           ctx.beginPath();
-          ctx.arc(px, py, DOT_R, 0, Math.PI * 2);
+          ctx.arc(drawPx, py, DOT_R, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -5085,7 +6065,7 @@ async function drawPaneToCtx(ctx, paneEl, x, y, w, h) {
     });
   }
   const canvasEl = paneEl.querySelector('canvas');
-  if (canvasEl) {
+  if (canvasEl && canvasEl.width > 0 && canvasEl.height > 0) {
     ctx.drawImage(canvasEl, x, y, w, h);
   }
 }
@@ -5112,6 +6092,64 @@ async function captureToCanvas(w, h) {
   } else {
     await drawPaneToCtx(ctx, bp, 0, 0, w, h);
   }
+  return off;
+}
+
+// ── 포스터 합성 — 제목·그래프·출처를 한 장으로 (export·스냅샷 공용) ──
+async function capturePoster(graphSize) {
+  const G = graphSize;
+  const pad = Math.round(G * 0.07);
+  const headerH = Math.round(G * 0.19);
+  const footerH = Math.round(G * 0.075);
+  const W = G + pad * 2;
+  const H = headerH + G + footerH;
+
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const ctx = off.getContext('2d');
+
+  // 배경
+  ctx.fillStyle = '#eceae5';
+  ctx.fillRect(0, 0, W, H);
+
+  // 그래프 (정사각형)
+  const graph = await captureToCanvas(G, G);
+  ctx.drawImage(graph, pad, headerH, G, G);
+
+  const cx = W / 2;
+  const FONT = "'Pretendard','Apple SD Gothic Neo',sans-serif";
+  ctx.textAlign = 'center';
+
+  // 브랜드 키커
+  ctx.fillStyle = '#b0aca6';
+  ctx.font = `600 ${Math.round(G * 0.019)}px ${FONT}`;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = `${Math.round(G * 0.004)}px`;
+  ctx.fillText('ONE SEOUL · 25 CITIES', cx, pad * 0.92);
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+
+  // 제목 (선택 항목) — 폭 넘으면 폰트 축소
+  const title = currentTitleText();
+  let fs = Math.round(G * 0.052);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = `600 ${fs}px ${FONT}`;
+  const maxW = W - pad * 2;
+  while (ctx.measureText(title).width > maxW && fs > G * 0.026) {
+    fs -= 2; ctx.font = `600 ${fs}px ${FONT}`;
+  }
+  ctx.fillText(title, cx, headerH * 0.6, maxW);
+
+  // 뷰·모드 설명
+  ctx.fillStyle = '#8a8680';
+  ctx.font = `400 ${Math.round(G * 0.024)}px ${FONT}`;
+  ctx.fillText(currentViewLabel(), cx, headerH * 0.82);
+
+  // 푸터 — 출처 + 날짜
+  const dateStr = new Date().toLocaleDateString(lang === 'en' ? 'en-US' : 'ko-KR');
+  const src = lang === 'en' ? 'Source: Seoul Open Data Plaza' : '출처: 서울 열린데이터광장';
+  ctx.fillStyle = '#9a958e';
+  ctx.font = `400 ${Math.round(G * 0.0185)}px ${FONT}`;
+  ctx.fillText(`${src}  ·  ${dateStr}`, cx, H - footerH * 0.42);
+
   return off;
 }
 
@@ -5286,8 +6324,7 @@ document.addEventListener('click', e => {
 
 async function exportAs(fmt) {
   document.getElementById('export-dd').classList.remove('open');
-  const rect = chartEl.getBoundingClientRect();
-  const off = await captureToCanvas(rect.width * 2, rect.height * 2);
+  const off = await capturePoster(1600);
   const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
   const q    = fmt === 'jpg' ? 0.92 : undefined;
   const label = [...active].map(k => FILTERS.find(f => f.key === k)?.label).join('-') || '서울구별데이터';
@@ -5299,24 +6336,18 @@ async function exportAs(fmt) {
 
 async function exportPDF() {
   document.getElementById('export-dd').classList.remove('open');
-  const rect = chartEl.getBoundingClientRect();
-  const off  = await captureToCanvas(rect.width * 2, rect.height * 2);
+  const off  = await capturePoster(1600);
   const dataURL = off.toDataURL('image/jpeg', 0.92);
-  const label = [...active].map(k => FILTERS.find(f => f.key === k)?.label).join(' · ') || '(없음)';
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head>
-    <meta charset="UTF-8"><title>서울 구별 데이터 비교</title>
+    <meta charset="UTF-8"><title>One Seoul · 25 Cities</title>
     <style>
       *{margin:0;padding:0;box-sizing:border-box}
-      body{background:#eceae5;font-family:'Apple SD Gothic Neo',sans-serif;padding:28px}
-      h1{font-size:18px;font-weight:300;color:#1a1a1a;margin-bottom:4px}
-      p{font-size:11px;color:#999;margin-bottom:18px}
-      img{width:100%;border-radius:3px}
-      @media print{body{padding:0}@page{margin:14mm}}
+      body{background:#eceae5;display:flex;align-items:center;justify-content:center;min-height:100vh}
+      img{max-width:100%;max-height:100vh;display:block}
+      @media print{@page{margin:0}body{min-height:auto}}
     </style>
   </head><body>
-    <h1>서울특별시 구별 데이터 비교</h1>
-    <p>${label} · ${new Date().toLocaleDateString('ko-KR')}</p>
     <img src="${dataURL}">
     <script>window.onload=()=>window.print()<\/script>
   </body></html>`);
@@ -5330,10 +6361,11 @@ const I18N = {
     'brand-strong': '서울에서 살고, 일하고, 즐기다', 'brand-span': '',
     'app-title': '하나의 서울,<br>25개의 도시',
     'app-desc': '면적 비례 블록과 왜상 통계지도로 서울 25개 자치구를 비교합니다',
-    'sec-layer': '데이터 레이어', 'sec-legend': '범례', 'sec-rank': '순위 필터',
-    'sec-questions': '시작 질문',
-    'q-toggle': '시작 질문 ▾',
-    'q-hint': '— 클릭하면 관련 레이어가 켜집니다',
+    'sec-layer': '필터', 'sec-legend': '선택된 레이어', 'sec-rank': '순위 필터',
+    'sec-questions': '어디서부터 볼까',
+    'q-toggle': '어디서부터 볼까',
+    'q-hint': '',
+    'reopen-q': '어디서부터 볼까',
     'tf-all': '전체', 'tf-count': '수', 'tf-area': '면적',
     'sec-xaxis': 'X 축', 'sec-yaxis': 'Y 축',
     'rank-all': '전체 보기', 'rank-top': '상위', 'rank-bot': '하위',
@@ -5346,6 +6378,7 @@ const I18N = {
     'snapshot-btn': '스냅샷', 'export-btn': '내보내기 ▾',
     'export-png': 'PNG 저장', 'export-jpg': 'JPG 저장', 'export-svg': 'SVG 저장', 'export-pdf': 'PDF 내보내기',
     'view-block': '트리맵', 'view-cartogram': '지도', 'view-timeline': '시간축', 'view-scatter': '산점도',
+    'tm-area': '실 토지면적', 'tm-data': '데이터 반영',
     'pane-timeline': '시간축 — 인구 변화 (2010 → 2024 예시)',
     'stamp-title': '저장된 스냅샷', 'stamp-empty': '저장된 스냅샷이 없습니다',
     'stamp-compare': '비교하기', 'stamp-clear': '전체 삭제', 'close': '닫기',
@@ -5366,10 +6399,11 @@ const I18N = {
     'brand-strong': 'Dwelling, Labor, Leisure', 'brand-span': '',
     'app-title': 'One Seoul,<br>25 Cities',
     'app-desc': 'Compare 25 Seoul districts through area-proportional blocks and cartograms',
-    'sec-layer': 'Data Layers', 'sec-legend': 'Legend', 'sec-rank': 'Rank Filter',
-    'sec-questions': 'Starter Questions',
-    'q-toggle': 'Questions ▾',
-    'q-hint': '— click to activate related layers',
+    'sec-layer': 'Filters', 'sec-legend': 'Selected Layers', 'sec-rank': 'Rank Filter',
+    'sec-questions': 'Where to start',
+    'q-toggle': 'Where to start',
+    'q-hint': '',
+    'reopen-q': 'Where to start',
     'tf-all': 'All', 'tf-count': 'Count', 'tf-area': 'Area',
     'sec-xaxis': 'X Axis', 'sec-yaxis': 'Y Axis',
     'rank-all': 'All', 'rank-top': 'Top', 'rank-bot': 'Bottom',
@@ -5382,6 +6416,7 @@ const I18N = {
     'snapshot-btn': 'Snapshots', 'export-btn': 'Export ▾',
     'export-png': 'Save PNG', 'export-jpg': 'Save JPG', 'export-svg': 'Save SVG', 'export-pdf': 'Export PDF',
     'view-block': 'Treemap', 'view-cartogram': 'Map', 'view-timeline': 'Timeline', 'view-scatter': 'Scatter',
+    'tm-area': 'Land Area', 'tm-data': 'Data Value',
     'pane-timeline': 'Timeline — Population change (2010 → 2024, demo)',
     'stamp-title': 'Saved Snapshots', 'stamp-empty': 'No saved snapshots',
     'stamp-compare': 'Compare', 'stamp-clear': 'Clear All', 'close': 'Close',
@@ -5405,6 +6440,127 @@ function t(key) { return I18N[lang][key] ?? key; }
 function fLabel(f) { return lang === 'en' ? f.label : (f.sub || f.label); }
 function fSub(f)   { return f.sub || ''; }
 function fDotLabel(f) { return lang === 'en' ? (f.dotLabelEn || f.dotLabel || '') : (f.dotLabel || ''); }
+
+// ── 자치구 레이더 프로필 ──
+// 낮을수록 좋은 지표 (점수 역산)
+const RADAR_INVERT = new Set(['crime5', 'pm25']);
+// 카테고리별 점수에 쓸 지표 — 자동 수집 (placeholder·scatterOnly 제외, 면적 데이터 위주)
+function radarFiltersFor(catKey) {
+  return FILTERS.filter(f =>
+    f.category === catKey && !f.placeholder && !f.scatterOnly
+  );
+}
+// 한 지표에 대한 자치구별 백분위(0~1) 맵 — 25개 구 중 상대 순위
+const _radarPctCache = {};
+function pctRankMap(f) {
+  if (_radarPctCache[f.key]) return _radarPctCache[f.key];
+  const vals = GU.map(g => ({ name: g.name, v: valOf(f, g) }));
+  const sorted = [...vals].sort((a, b) => a.v - b.v);
+  const n = sorted.length;
+  const map = {};
+  sorted.forEach((d, i) => { map[d.name] = n > 1 ? i / (n - 1) : 0.5; });
+  if (RADAR_INVERT.has(f.key)) {
+    Object.keys(map).forEach(k => { map[k] = 1 - map[k]; });
+  }
+  _radarPctCache[f.key] = map;
+  return map;
+}
+// 자치구의 6개 카테고리 점수 (0~1)
+function categoryScores(name) {
+  return CATEGORIES.map(cat => {
+    const fs = radarFiltersFor(cat.key);
+    if (!fs.length) return { cat, score: 0 };
+    const sum = fs.reduce((acc, f) => acc + (pctRankMap(f)[name] ?? 0), 0);
+    return { cat, score: sum / fs.length };
+  });
+}
+
+// 6각형 레이더 SVG 생성
+function radarSVG(scores) {
+  const CX = 130, CY = 120, R = 78;
+  const N = scores.length;
+  const angle = i => (-Math.PI / 2) + (i * 2 * Math.PI / N);
+  const pt = (i, r) => [CX + Math.cos(angle(i)) * r, CY + Math.sin(angle(i)) * r];
+  // 최강 카테고리 인덱스 (라벨 강조)
+  const maxScore = Math.max(...scores.map(s => s.score));
+  // 그리드 (동심 육각형)
+  let grid = '';
+  [0.25, 0.5, 0.75, 1].forEach(level => {
+    const poly = scores.map((_, i) => pt(i, R * level).map(n => n.toFixed(1)).join(',')).join(' ');
+    grid += `<polygon class="dc-radar-grid" points="${poly}"/>`;
+  });
+  // 스포크
+  let spokes = '';
+  scores.forEach((_, i) => {
+    const [x, y] = pt(i, R);
+    spokes += `<line class="dc-radar-spoke" x1="${CX}" y1="${CY}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+  });
+  // 데이터 폴리곤
+  const dataPoly = scores.map((s, i) => pt(i, R * Math.max(0.04, s.score)).map(n => n.toFixed(1)).join(',')).join(' ');
+  let pts = '';
+  scores.forEach((s, i) => {
+    const [x, y] = pt(i, R * Math.max(0.04, s.score));
+    pts += `<circle class="dc-radar-pt" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4"/>`;
+  });
+  // 축 라벨
+  let labels = '';
+  scores.forEach((s, i) => {
+    const [x, y] = pt(i, R + 16);
+    const a = angle(i);
+    let anchor = 'middle';
+    if (Math.cos(a) > 0.3) anchor = 'start';
+    else if (Math.cos(a) < -0.3) anchor = 'end';
+    let dy = '0.32em';
+    if (Math.sin(a) < -0.5) dy = '0em';
+    else if (Math.sin(a) > 0.5) dy = '0.6em';
+    const txt = lang === 'en' ? s.cat.label.split(' ')[0] : s.cat.sub;
+    const strong = s.score === maxScore && maxScore > 0 ? ' strong' : '';
+    labels += `<text class="dc-radar-axis-lbl${strong}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" dy="${dy}">${txt}</text>`;
+  });
+  return `<svg class="dc-radar" viewBox="0 0 260 230" preserveAspectRatio="xMidYMid meet">
+    ${grid}${spokes}
+    <polygon class="dc-radar-area" points="${dataPoly}"/>
+    ${pts}${labels}
+  </svg>`;
+}
+
+let _dcEscBound = false;
+function openDistrictCard(name) {
+  const card = document.getElementById('district-card');
+  if (!card) return;
+  const g = GU.find(d => d.name === name);
+  if (!g) return;
+  const scores = categoryScores(name);
+  // 강점 — 상위 2개 카테고리
+  const ranked = [...scores].sort((a, b) => b.score - a.score);
+  const top = ranked.slice(0, 2).filter(s => s.score > 0.5);
+  const chips = top.map(s => `<span class="dc-chip">${lang === 'en' ? s.cat.label.split(' ')[0] : s.cat.sub}</span>`).join('');
+  const strengthTxt = top.length
+    ? (lang === 'en'
+        ? `${chips} stand out in ${name}.`
+        : `${name}는 ${chips} 영역이 두드러집니다.`)
+    : (lang === 'en' ? 'A balanced profile across all axes.' : '모든 축이 고르게 균형 잡힌 자치구입니다.');
+  const areaLine = `${g.area} km²`;
+  card.innerHTML = `
+    <button class="district-card-close" onclick="closeDistrictCard()" aria-label="close">×</button>
+    <div class="district-card-name">${name}</div>
+    <div class="district-card-area">${areaLine}</div>
+    <div class="dc-radar-wrap">${radarSVG(scores)}</div>
+    <div class="dc-strength">${strengthTxt}</div>`;
+  card.classList.add('show');
+  // 시작 질문 팝업과 자리 겹침 방지 — 카드 열릴 때 팝업 살짝 숨김
+  document.getElementById('q-popup')?.classList.add('dc-hidden');
+  if (!_dcEscBound) {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDistrictCard();
+    });
+    _dcEscBound = true;
+  }
+}
+function closeDistrictCard() {
+  document.getElementById('district-card')?.classList.remove('show');
+  document.getElementById('q-popup')?.classList.remove('dc-hidden');
+}
 
 function setLang(l) {
   lang = l;
@@ -5491,8 +6647,8 @@ const QUESTIONS_EN = [
   { tag:'Home', text:'Best value to buy a home?', layers:['housing','housePrice','subwayStations'] },
 ];
 
-// ── 시작 질문 — 한 번에 3개 보이게, 각 카드의 X로 다른 질문으로 교체 ──
-const Q_VISIBLE = 3;            // 동시에 보이는 카드 개수
+// ── 시작 질문 — 한 번에 1개만 보이게, 카드의 ↻ 로 다른 질문으로 교체 ──
+const Q_VISIBLE = 1;            // 동시에 보이는 카드 개수
 let _qShuffle = [];             // 섞은 인덱스 풀 (보이지 않는 후보)
 let _qVisible = [];             // 현재 보이는 인덱스 [3개]
 
@@ -5512,11 +6668,12 @@ function renderQuestions() {
   if (!wrap) return;
   const list = lang === 'en' ? QUESTIONS_EN : QUESTIONS;
   const skipLabel = lang === 'en' ? 'next question' : '다른 질문';
+  const cardClass = _qVisible.length === 1 ? 'single' : 'multi';
   wrap.innerHTML = _qVisible.map((idx, slot) => {
     const q = list[idx];
     return `
-      <button class="q-card multi" data-q="${idx}" data-slot="${slot}">
-        <span class="q-card-x" role="button" tabindex="0" aria-label="${skipLabel}" title="${skipLabel}">×</span>
+      <button class="q-card ${cardClass}" data-q="${idx}" data-slot="${slot}">
+        <span class="q-card-x" role="button" tabindex="0" aria-label="${skipLabel}" title="${skipLabel}">↻</span>
         <span class="q-tag">${q.tag}</span>
         <span class="q-text">${q.text}</span>
       </button>`;
@@ -6447,13 +7604,25 @@ function applyIntroLang() {
   const titleEl = document.getElementById('intro-title');
   const qEl = document.getElementById('intro-questions');
   const ctaEl = document.getElementById('intro-cta');
+  const helloEl = document.getElementById('intro-hello');
+  if (helloEl) {
+    helloEl.textContent = (langNow === 'ko') ? '안녕하세요' : 'Annyeonghaseyo (안녕하세요)';
+    helloEl.classList.toggle('ko', langNow === 'ko');
+    // 언어 토글 시 인사 애니메이션 다시 재생 (intro 떠 있을 때만 의미 있음)
+    helloEl.style.animation = 'none';
+    void helloEl.offsetWidth;
+    helloEl.style.animation = '';
+  }
   if (!titleEl || !qEl) return;
   if (langNow === 'ko') {
     titleEl.textContent = '서울에서 살고, 일하고, 즐기다';
     titleEl.classList.add('ko');
     qEl.classList.add('ko');
     qEl.innerHTML = `
-      <li>서울에 대해 알아보기</li>`;
+      <li>서울의 사람들은,</li>
+      <li>어디에서 사는가?</li>
+      <li>어떻게 일을 하는가?</li>
+      <li>어떻게 휴식을 취하는가?</li>`;
     if (ctaEl) {
       ctaEl.textContent = '아무 곳이나 클릭해서 시작';
       ctaEl.classList.add('ko');
@@ -6463,7 +7632,10 @@ function applyIntroLang() {
     titleEl.classList.remove('ko');
     qEl.classList.remove('ko');
     qEl.innerHTML = `
-      <li>Explore Seoul</li>`;
+      <li>People of Seoul,</li>
+      <li>Where do they live?</li>
+      <li>How do they work?</li>
+      <li>How do they rest?</li>`;
     if (ctaEl) {
       ctaEl.textContent = 'click anywhere to begin';
       ctaEl.classList.remove('ko');
@@ -6497,6 +7669,11 @@ buildQuestions();
 refreshActiveUI();
 buildViz();
 loadCartoPaths().then(() => buildCartogram());
+// URL ?layers=...&view=... 파라미터로 들어오면 상태 복원
+applyUrlState();
+// 인라인 Wall 인사이트 목록 비동기 로드
+if (typeof loadWallList === 'function') loadWallList();
+if (typeof refreshWallStateDisplay === 'function') refreshWallStateDisplay();
 
 </script>
 </body>
