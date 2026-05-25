@@ -740,11 +740,12 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 }
 
 /* 산점도 — 한 축만 선택했을 때 안내 팝업 (q-popup 위에 살짝 띄움) */
+/* 산점도 안내 — 하단 q-popup·상단 제목과 겹치지 않게 제목 아래·그래프 상단에 표시 */
 .scatter-axis-hint {
   position: fixed;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%) translateY(20px);
+  left: calc(50% + 130px);
+  top: 112px;
+  transform: translateX(-50%) translateY(-8px);
   background: rgba(26, 26, 26, 0.94);
   color: #f4f3ef;
   padding: 9px 18px;
@@ -760,7 +761,10 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 }
 .scatter-axis-hint.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(-72px);
+  transform: translateX(-50%) translateY(0);
+}
+@media (max-width: 920px) {
+  .scatter-axis-hint { left: 50%; }
 }
 @media (max-width: 600px) {
   .scatter-axis-hint { font-size: 9.5px; padding: 8px 14px; }
@@ -1116,6 +1120,8 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   transition: opacity 0.3s ease;
 }
 .ct-name .ct-sep { color: #c4bfb6; font-weight: 400; margin: 0 5px; }
+/* 통근(chord) 뷰는 단일 흐름이라 선택 항목 제목이 의미 없음 → 숨김 */
+body.chord-mode .chart-title { display: none; }
 /* 토글과 그래프 사이 얇은 구분선 */
 #block-pane::after {
   content: '';
@@ -2836,7 +2842,7 @@ body.chord-mode #chord-controls { display: block !important; }
 
   <!-- 흐름 모드: 사이드바 컨트롤 — 통근 흐름 단일 항목 -->
   <div id="chord-controls" style="display:none">
-    <div class="section-label">흐름</div>
+    <div class="section-label">통근</div>
     <div class="filter-cat-label" style="margin-top:12px">교통 · 이동</div>
     <div class="filter-btn on" style="cursor:default" aria-pressed="true">
       <span class="fdot" style="background:#5a8aaa"></span>
@@ -2859,8 +2865,8 @@ body.chord-mode #chord-controls { display: block !important; }
       <div class="view-toggle">
         <button class="vt-btn active" id="vt-block" onclick="setView('block')" data-i18n="view-block">트리맵</button>
         <button class="vt-btn" id="vt-cartogram" onclick="setView('cartogram')" data-i18n="view-cartogram">지도</button>
-        <button class="vt-btn" id="vt-scatter" onclick="setView('scatter')" data-i18n="view-scatter">산점도</button>
-        <button class="vt-btn" id="vt-chord" onclick="setView('chord')" data-i18n="view-chord">흐름</button>
+        <button class="vt-btn" id="vt-scatter" onclick="setView('scatter')" data-i18n="view-scatter" title="지표 2개를 골라 X·Y축으로 비교">산점도</button>
+        <button class="vt-btn" id="vt-chord" onclick="setView('chord')" data-i18n="view-chord" title="자치구 간 통근 이동 흐름">통근</button>
       </div>
       <span class="hl" id="active-label" style="display:none">레이어를 선택하세요</span>
       <button class="tb-btn accent" id="save-stamp-btn" onclick="saveStamp()" data-i18n="save-btn">저장</button>
@@ -2901,7 +2907,7 @@ body.chord-mode #chord-controls { display: block !important; }
       <div class="carto-empty" id="carto-empty" data-i18n="pane-carto-empty">레이어를 선택하면 데이터에 따라 구의 크기가 달라집니다</div>
     </div>
     <div class="view-pane" id="chord-pane" style="display:none">
-      <div class="view-pane-label" data-i18n="pane-chord">흐름 — 자치구 간 통근 이동</div>
+      <div class="view-pane-label" data-i18n="pane-chord">통근 — 자치구 간 이동 흐름</div>
       <div class="chord-empty" id="chord-empty">서울 25개 자치구 사이의 통근 흐름을 보여줍니다 · KT 생활이동 데이터 기반 (합성 매트릭스)</div>
     </div>
   </div>
@@ -3963,9 +3969,9 @@ function refreshActiveUI() {
   if (cabCount) cabCount.textContent = totalCount;
   if (cabS) cabS.disabled = totalCount === 0;
   if (cabSCount) cabSCount.textContent = totalCount;
-  // 순위 섹션 — 활성 필터가 있을 때만 노출
+  // 순위 섹션 — 활성 필터가 있을 때만 노출 (산점도는 순위 개념이 없어 숨김)
   const rankSec = document.getElementById('rank-section');
-  if (rankSec) rankSec.style.display = active.size > 0 ? '' : 'none';
+  if (rankSec) rankSec.style.display = (active.size > 0 && viewMode !== 'scatter') ? '' : 'none';
   // 인사이트 입력 바도 같이 토글
   if (typeof refreshInsightBar === 'function') refreshInsightBar();
   // 인라인 wall 상태 표시도 갱신
@@ -5355,16 +5361,17 @@ function updateScatterAxisHint(xF, yF) {
     return;
   }
   if (xF && yF) {
+    // 둘 다 선택됨 — 안내 숨김
     hint.classList.remove('show');
-  } else if (xF && !yF) {
-    hint.textContent = lang === 'en' ? 'Add a Y axis to see them meet' : 'Y축에서 하나 더 골라보세요';
-    hint.classList.add('show');
-  } else if (!xF && yF) {
-    hint.textContent = lang === 'en' ? 'Add an X axis to see them meet' : 'X축에서 하나 더 골라보세요';
+  } else if (xF || yF) {
+    // 1개 선택 — 하나 더 고르면 비교
+    hint.textContent = lang === 'en'
+      ? 'Pick one more metric to compare on X · Y'
+      : '하나만 더 선택하면 X · Y축으로 비교돼요';
     hint.classList.add('show');
   } else {
-    hint.textContent = lang === 'en' ? 'Pick something for X and Y' : 'X축, Y축에서 하나씩 골라봐요';
-    hint.classList.add('show');
+    // 0개 — 그래프 중앙 안내가 있으므로 토스트는 숨김
+    hint.classList.remove('show');
   }
 }
 
@@ -5396,6 +5403,10 @@ function setView(mode) {
   bp.style.display = (mode === 'block' || mode === 'scatter') ? '' : 'none';
   cp.style.display = (mode === 'cartogram') ? '' : 'none';
   if (chp) chp.style.display = (mode === 'chord') ? '' : 'none';
+
+  // 실 토지면적/데이터 반영 토글은 트리맵에서만 의미 있음 → 트리맵 뷰에서만 표시
+  const tmt = document.getElementById('tm-mode-toggle');
+  if (tmt) tmt.style.display = (mode === 'block') ? '' : 'none';
 
   // 모드 변경 시 "모두 해제" 카운트가 산점도 축 포함 여부 반영하도록
   refreshActiveUI();
@@ -5700,6 +5711,41 @@ function toggleChordPlay() {
   chordPlayTimer = requestAnimationFrame(tick);
 }
 
+// 산점도 빈 상태 안내 — 두 지표를 X·Y로 비교한다는 사용법을 그래프 중앙에 표시
+function drawScatterGuide() {
+  const rect = chartEl.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'none');
+  svg.selectAll('*').remove();
+  const font = "'Pretendard','Apple SD Gothic Neo',sans-serif";
+  const cx = W / 2, cy = H / 2;
+  const g = svg.append('g').attr('text-anchor', 'middle');
+
+  // 미니 X·Y 축 일러스트
+  const ax = cx, ay = cy - 86, L = 52;
+  const axis = g.append('g').attr('transform', `translate(${ax},${ay})`);
+  axis.append('line').attr('x1', -L/2).attr('y1', L/2).attr('x2', -L/2).attr('y2', -L/2)
+    .attr('stroke', '#c4bfb6').attr('stroke-width', 1.4);
+  axis.append('line').attr('x1', -L/2).attr('y1', L/2).attr('x2', L/2).attr('y2', L/2)
+    .attr('stroke', '#c4bfb6').attr('stroke-width', 1.4);
+  [[-14, 6],[2,-10],[16,-22],[-4,12],[10,-4]].forEach(([dx,dy]) =>
+    axis.append('circle').attr('cx', dx).attr('cy', dy).attr('r', 3.4)
+      .attr('fill', '#1a1a1a').attr('opacity', 0.55));
+  axis.append('text').attr('x', L/2 + 6).attr('y', L/2 + 4).attr('text-anchor', 'start')
+    .attr('font-family', font).attr('font-size', 9).attr('font-weight', 600).attr('fill', '#b0aca6').text('X');
+  axis.append('text').attr('x', -L/2 - 6).attr('y', -L/2 + 2).attr('text-anchor', 'end')
+    .attr('font-family', font).attr('font-size', 9).attr('font-weight', 600).attr('fill', '#b0aca6').text('Y');
+
+  g.append('text').attr('x', cx).attr('y', cy + 4)
+    .attr('font-family', font).attr('font-size', 16).attr('font-weight', 600).attr('fill', '#1a1a1a')
+    .text(lang === 'en' ? 'Compare two metrics on X · Y' : '두 지표를 X · Y축으로 비교해보세요');
+  g.append('text').attr('x', cx).attr('y', cy + 30)
+    .attr('font-family', font).attr('font-size', 11.5).attr('font-weight', 300).attr('fill', '#8a8680')
+    .text(lang === 'en'
+      ? 'Pick two layers from the sidebar — first becomes X, second becomes Y'
+      : '사이드바에서 지표를 2개 선택하세요 — 먼저 고른 것이 X축, 다음이 Y축');
+}
+
 function buildScatter() {
   // 사이드바의 active 필터를 산점도 X/Y 축으로 자동 매핑
   // (사이드바가 모든 뷰에서 동일한 UI이므로 별도 X/Y 선택 UI 불필요)
@@ -5724,9 +5770,9 @@ function buildScatter() {
     else lbl.textContent = lang === 'en' ? 'Scatter — pick axes' : '산점도 — 축 선택';
   }
 
-  // 둘 다 없으면 빈 상태
+  // 둘 다 없으면 빈 상태 — 사용법 안내
   if (!xF && !yF) {
-    svg.selectAll('*').remove();
+    drawScatterGuide();
     return;
   }
 
@@ -6377,7 +6423,7 @@ const I18N = {
     'save-btn': '저장', 'saving': '저장 중…',
     'snapshot-btn': '스냅샷', 'export-btn': '내보내기 ▾',
     'export-png': 'PNG 저장', 'export-jpg': 'JPG 저장', 'export-svg': 'SVG 저장', 'export-pdf': 'PDF 내보내기',
-    'view-block': '트리맵', 'view-cartogram': '지도', 'view-timeline': '시간축', 'view-scatter': '산점도',
+    'view-block': '트리맵', 'view-cartogram': '지도', 'view-timeline': '시간축', 'view-scatter': '산점도', 'view-chord': '통근',
     'tm-area': '실 토지면적', 'tm-data': '데이터 반영',
     'pane-timeline': '시간축 — 인구 변화 (2010 → 2024 예시)',
     'stamp-title': '저장된 스냅샷', 'stamp-empty': '저장된 스냅샷이 없습니다',
@@ -6415,7 +6461,7 @@ const I18N = {
     'save-btn': 'Save', 'saving': 'Saving…',
     'snapshot-btn': 'Snapshots', 'export-btn': 'Export ▾',
     'export-png': 'Save PNG', 'export-jpg': 'Save JPG', 'export-svg': 'Save SVG', 'export-pdf': 'Export PDF',
-    'view-block': 'Treemap', 'view-cartogram': 'Map', 'view-timeline': 'Timeline', 'view-scatter': 'Scatter',
+    'view-block': 'Treemap', 'view-cartogram': 'Map', 'view-timeline': 'Timeline', 'view-scatter': 'Scatter', 'view-chord': 'Commute',
     'tm-area': 'Land Area', 'tm-data': 'Data Value',
     'pane-timeline': 'Timeline — Population change (2010 → 2024, demo)',
     'stamp-title': 'Saved Snapshots', 'stamp-empty': 'No saved snapshots',
