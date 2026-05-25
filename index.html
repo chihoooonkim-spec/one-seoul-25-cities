@@ -1428,14 +1428,41 @@ body.chord-mode .chart-title { display: none; }
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
   background: rgba(244,243,239,0.96);
   border: 1px solid #c8c5be;
   border-radius: 4px;
-  padding: 8px 16px;
-  width: min(540px, calc(100% - 64px));
+  padding: 10px 16px;
+  width: min(560px, calc(100% - 64px));
   font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif;
+}
+.ch-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 9.5px;
+  color: #8a8680;
+  letter-spacing: 0.2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e4e2dc;
+}
+.ch-legend b { color: #1a1a1a; font-weight: 600; margin-right: 3px; }
+.ch-legend .ch-src { color: #b0aca6; }
+.ch-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ch-hour-lbl {
+  font-size: 9px;
+  color: #8a8680;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }
 .ch-play {
   width: 28px; height: 28px;
@@ -5565,11 +5592,19 @@ async function buildChord() {
   const hourCtrl = d3.select(pane).append('div')
     .attr('class', 'chord-hour-controls')
     .html(`
-      <button class="ch-play" id="ch-play" onclick="toggleChordPlay()" aria-label="play">▶</button>
-      <span class="ch-hour" id="ch-hour">${String(chordHour).padStart(2,'0')}시</span>
-      <input type="range" min="0" max="23" step="0.1" value="${chordHour}"
-             oninput="setChordTime(parseFloat(this.value))" class="ch-slider" id="ch-slider">
-      <span class="ch-bounds">00 — 23</span>
+      <div class="ch-legend">
+        <span><b>바깥 띠</b> 자치구별 통근량</span>
+        <span><b>안쪽 선</b> 두 구 사이 이동</span>
+        <span class="ch-src">KT 생활이동 데이터 · 합성</span>
+      </div>
+      <div class="ch-row">
+        <button class="ch-play" id="ch-play" onclick="toggleChordPlay()" aria-label="play">▶</button>
+        <span class="ch-hour-lbl">기준 시각</span>
+        <span class="ch-hour" id="ch-hour">${String(chordHour).padStart(2,'0')}시</span>
+        <input type="range" min="0" max="23" step="0.1" value="${chordHour}"
+               oninput="setChordTime(parseFloat(this.value))" class="ch-slider" id="ch-slider">
+        <span class="ch-bounds">00 — 23</span>
+      </div>
     `);
 
   drawChordAtTime(chordHour);
