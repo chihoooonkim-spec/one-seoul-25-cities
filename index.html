@@ -731,7 +731,8 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   visibility: visible !important;
 }
 /* 처음에는 collapsed 상태로 시작, idle 시 자동 펼쳐짐 */
-.q-popup.collapsed { transform: translateX(-50%) translateY(calc(100% - 36px)); }
+.q-popup.collapsed { transform: translateX(-50%); }
+.q-popup.collapsed .q-popup-list { display: none; }
 .q-popup.dc-hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(12px); }
 .q-popup.auto-shown { animation: qPopupNudge 0.6s ease-out; }
 @keyframes qPopupNudge {
@@ -769,7 +770,8 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 @media (max-width: 600px) {
   .scatter-axis-hint { font-size: 9.5px; padding: 8px 14px; }
 }
-.q-popup.collapsed { transform: translateX(-50%) translateY(calc(100% - 36px)); }
+.q-popup.collapsed { transform: translateX(-50%); }
+.q-popup.collapsed .q-popup-list { display: none; }
 .q-popup-head {
   display: flex;
   align-items: center;
@@ -1080,14 +1082,14 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   justify-content: stretch;
   overflow: hidden;
 }
-/* 트리맵 SVG — 상단 제목(56px)·하단 토글(62px) 공간을 비우고 stretch.
+/* 트리맵 SVG — 상단 제목(56px)·하단 푸터(30px) 공간을 비우고 stretch.
    canvas(점·면적)는 replaced element라 inset stretch가 안 되므로
    CSS로 잡지 않고 redrawDots에서 이 SVG 영역에 px로 정확히 맞춘다. */
 #block-pane > svg {
-  top: 56px !important;
+  top: 82px !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: 62px !important;
+  bottom: 30px !important;
   width: auto !important;
   height: auto !important;
 }
@@ -1113,26 +1115,15 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 .ct-name {
   font-size: 17px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: rgba(26,26,26,0.42);
   letter-spacing: -0.3px;
   margin-top: 4px;
   line-height: 1.25;
   transition: opacity 0.3s ease;
 }
-.ct-name .ct-sep { color: #c4bfb6; font-weight: 400; margin: 0 5px; }
+.ct-name .ct-sep { color: rgba(26,26,26,0.22); font-weight: 400; margin: 0 5px; }
 /* 통근(chord) 뷰는 단일 흐름이라 선택 항목 제목이 의미 없음 → 숨김 */
 body.chord-mode .chart-title { display: none; }
-/* 토글과 그래프 사이 얇은 구분선 */
-#block-pane::after {
-  content: '';
-  position: absolute;
-  left: 16px; right: 16px;
-  bottom: 50px;
-  height: 1px;
-  background: #e4e2dc;
-  pointer-events: none;
-  z-index: 20;
-}
 
 .view-pane + .view-pane { border-left: 1px solid #d8d6d0; }
 
@@ -2704,7 +2695,7 @@ body.chord-mode #chord-controls { display: block !important; }
   .topbar > span:first-child { display: none; }
   .topbar .hl { max-width: 150px; }
   .app-title { font-size: 17px; padding-bottom: 14px; margin-bottom: 14px; }
-  .app-desc { display: none; }
+  .app-desc { font-size: 10px; line-height: 1.7; padding: 12px 0 4px; }
   .filter-cat-label { margin-top: 22px; }
 }
 
@@ -2730,7 +2721,7 @@ body.chord-mode #chord-controls { display: block !important; }
   .flabel-text { font-size: 9.5px; }
   .vt-btn, .tb-btn, .lang-btn { padding: 4px 7px; font-size: 9px; min-height: 22px; }
   .app-title { font-size: 16px; }
-  .app-desc { display: none; }
+  .app-desc { font-size: 9.5px; line-height: 1.65; padding: 10px 0 4px; }
   .tb-about-link { font-size: 9px; padding: 0 4px; }
 }
 
@@ -2863,7 +2854,8 @@ body.chord-mode #chord-controls { display: block !important; }
     <span data-i18n="topbar-desc">서울특별시 25개 자치구 · 셀 크기 = 실제 면적(km²)</span>
     <div class="tb-actions">
       <div class="view-toggle">
-        <button class="vt-btn active" id="vt-block" onclick="setView('block')" data-i18n="view-block">트리맵</button>
+        <button class="vt-btn active" id="vt-block" onclick="setView('block')" data-i18n="view-block" title="자치구 면적 셀 위에 데이터를 점으로 분포">점 분포</button>
+        <button class="vt-btn" id="vt-datamap" onclick="setView('datamap')" data-i18n="view-datamap" title="지표 하나를 골라 값에 따라 셀 크기·색이 달라지는 트리맵">데이터 면적</button>
         <button class="vt-btn" id="vt-cartogram" onclick="setView('cartogram')" data-i18n="view-cartogram">지도</button>
         <button class="vt-btn" id="vt-scatter" onclick="setView('scatter')" data-i18n="view-scatter" title="지표 2개를 골라 X·Y축으로 비교">산점도</button>
         <button class="vt-btn" id="vt-chord" onclick="setView('chord')" data-i18n="view-chord" title="자치구 간 통근 이동 흐름">통근</button>
@@ -2894,12 +2886,8 @@ body.chord-mode #chord-controls { display: block !important; }
       <div class="ct-name" id="ct-name">서울 25개 자치구</div>
     </div>
     <div class="view-pane" id="block-pane">
-      <div class="view-pane-label" data-i18n="pane-block">면적 비례 트리맵</div>
-      <div class="tm-mode-toggle" id="tm-mode-toggle">
-        <button class="tmm-btn active" data-mode="area" onclick="setTreemapMode('area')" data-i18n="tm-area">실 토지면적</button>
-        <button class="tmm-btn" data-mode="data" onclick="setTreemapMode('data')" data-i18n="tm-data">데이터 반영</button>
-      </div>
-      <div class="view-pane-foot" data-i18n="seoul-total">서울특별시 총면적 605.24 km²</div>
+      <div class="view-pane-label" data-i18n="pane-block">점 분포 — 자치구 면적 위 데이터</div>
+      <div class="view-pane-foot" id="block-pane-foot" data-i18n="seoul-total">서울특별시 총면적 605.24 km²</div>
     </div>
     <div class="view-pane" id="carto-pane" style="display:none">
       <div class="view-pane-label" data-i18n="pane-carto">지도 — 데이터 비례 변형</div>
@@ -2919,13 +2907,13 @@ body.chord-mode #chord-controls { display: block !important; }
   <!-- 시작 질문 — 하단 고정 팝업 -->
   <div class="q-popup" id="q-popup">
     <div class="q-popup-head" onclick="toggleQuestionsPopup()">
-      <span class="q-popup-title" data-i18n="sec-questions">어디서부터 볼까</span>
+      <span class="q-popup-title" data-i18n="sec-questions">서울에서 궁금한 점은?</span>
       <button class="q-popup-toggle" id="q-popup-toggle" onclick="event.stopPropagation();toggleQuestionsPopup()" aria-label="toggle">⌃</button>
       <button class="q-popup-close" id="q-popup-close" onclick="event.stopPropagation();closeQuestionsPopup()" aria-label="close" title="팝업 닫기">×</button>
     </div>
     <div class="q-popup-list" id="q-list"></div>
   </div>
-  <button class="q-popup-reopen" id="q-popup-reopen" onclick="openQuestionsPopup()" aria-label="reopen questions" data-i18n="reopen-q">어디서부터 볼까</button>
+  <button class="q-popup-reopen" id="q-popup-reopen" onclick="openQuestionsPopup()" aria-label="reopen questions" data-i18n="reopen-q">서울에서 궁금한 점은?</button>
   </div>
 
 
@@ -3548,6 +3536,24 @@ function toggle(key) {
   // placeholder는 토글 불가
   const f = FILTERS.find(x => x.key === key);
   if (!f || f.placeholder) return;
+
+  // 데이터 면적 뷰: 한 번에 1개만 (두 데이터를 동시에 반영할 수 없음)
+  if (viewMode === 'datamap') {
+    const wasOn = active.has(key);
+    active.clear();
+    document.querySelectorAll('.filter-btn.on').forEach(b => b.classList.remove('on'));
+    if (!wasOn) {
+      active.add(key);
+      document.querySelectorAll(`.filter-btn[data-key="${key}"]`).forEach(b => b.classList.add('on'));
+    }
+    refreshActiveUI();
+    updateLegend();
+    updateTopNStats();
+    buildViz();
+    redrawDots();
+    return;
+  }
+
   const wasOn = active.has(key);
   if (wasOn) active.delete(key);
   else active.add(key);
@@ -3992,9 +3998,8 @@ function currentViewLabel() {
   if (viewMode === 'cartogram') return lang === 'en' ? 'Cartogram' : '데이터 비례 지도';
   if (viewMode === 'scatter')   return lang === 'en' ? 'Scatter plot' : '산점도';
   if (viewMode === 'chord')     return lang === 'en' ? 'Commute flow' : '통근 흐름';
-  return window.treemapMode === 'data'
-    ? (lang === 'en' ? 'Data-proportional treemap' : '데이터 비례 트리맵')
-    : (lang === 'en' ? 'Area-proportional treemap' : '면적 비례 트리맵');
+  if (viewMode === 'datamap')   return lang === 'en' ? 'Treemap sized & shaded by data' : '데이터에 따른 면적';
+  return lang === 'en' ? 'Dot distribution over district areas' : '점 분포 — 자치구 면적 위 데이터';
 }
 function updateChartTitle() {
   const el = document.getElementById('ct-name');
@@ -4791,6 +4796,29 @@ function buildViz() {
   const cellDelay = d => (orderById.get(d.name) || 0) * 18;
   const RISE_DUR = 620;
 
+  // 데이터 면적 모드: 값 높은→낮은 순으로 그라데이션 색
+  const _dataDriver = (window.treemapMode === 'data')
+    ? (FILTERS.find(f => f.key === (focusKey || (active.size ? [...active][active.size - 1] : null))) || null)
+    : null;
+  let cellFill = () => '#eae8e3';
+  if (_dataDriver) {
+    const ext = d3.extent(GU, g => valOf(_dataDriver, g));
+    const t = d3.scaleLinear().domain(ext[0] === ext[1] ? [ext[0]-1, ext[1]] : ext).range([0.14, 1]);
+    const lerp = d3.interpolateRgb('#e9e6df', _dataDriver.color || '#1a1a1a');
+    cellFill = d => lerp(t(valOf(_dataDriver, d.data)));
+  }
+  // 셀 배경 명도에 따라 글자색 (진한 셀=흰 글자)
+  const nameColor = d => {
+    if (window.treemapMode !== 'data') return 'rgba(30,28,25,0.82)';
+    const c = d3.color(cellFill(d)); if (!c) return 'rgba(30,28,25,0.82)';
+    return (0.299*c.r + 0.587*c.g + 0.114*c.b) < 145 ? 'rgba(255,255,255,0.94)' : 'rgba(30,28,25,0.84)';
+  };
+  const subColor = d => {
+    if (window.treemapMode !== 'data') return 'rgba(30,28,25,0.28)';
+    const c = d3.color(cellFill(d)); if (!c) return 'rgba(30,28,25,0.28)';
+    return (0.299*c.r + 0.587*c.g + 0.114*c.b) < 145 ? 'rgba(255,255,255,0.6)' : 'rgba(30,28,25,0.4)';
+  };
+
   // 배경 — 바닥에서 위로 차오름 (높이 0 → 실제 높이)
   cells.append('rect')
     .attr('class', 'bg-rect')
@@ -4798,7 +4826,7 @@ function buildViz() {
     .attr('width',  d => d.x1 - d.x0)
     .attr('y',      d => d.y1 - d.y0)
     .attr('height', 0)
-    .attr('fill', '#eae8e3')
+    .attr('fill', cellFill)
     .attr('rx', 2)
     .transition()
       .delay(cellDelay)
@@ -4831,7 +4859,7 @@ function buildViz() {
     .attr('class', 'name-txt')
     .attr('pointer-events', 'none')
     .attr('text-anchor', 'middle')
-    .attr('fill', 'rgba(30,28,25,0.82)')
+    .attr('fill', nameColor)
     .attr('font-weight', '600')
     .attr('font-family', "'Pretendard','Apple SD Gothic Neo',sans-serif")
     .attr('x', d => (d.x1 - d.x0) / 2)
@@ -4859,7 +4887,7 @@ function buildViz() {
     .attr('class', 'area-txt')
     .attr('pointer-events', 'none')
     .attr('text-anchor', 'middle')
-    .attr('fill', 'rgba(30,28,25,0.28)')
+    .attr('fill', subColor)
     .attr('font-weight', '300')
     .attr('font-family', "'Pretendard','Apple SD Gothic Neo',sans-serif")
     .attr('x', d => (d.x1 - d.x0) / 2)
@@ -4872,7 +4900,13 @@ function buildViz() {
     .style('opacity', 0)
     .text(d => {
       const w = d.x1 - d.x0, h = d.y1 - d.y0;
-      return (w < 50 || h < 38) ? '' : d.data.area + 'km²';
+      if (w < 50 || h < 38) return '';
+      // 데이터 면적 모드: 실면적 대신 선택 지표의 값 표시
+      if (_dataDriver) {
+        const v = valOf(_dataDriver, d.data);
+        return (_dataDriver.fmt ? _dataDriver.fmt(v) : v.toLocaleString()) + (_dataDriver.unit || '');
+      }
+      return d.data.area + 'km²';
     })
     .transition()
       .delay(d => cellDelay(d) + RISE_DUR * 0.7)
@@ -4904,8 +4938,8 @@ function redrawDots() {
     canvas.style.right  = 'auto';
     canvas.style.bottom = 'auto';
   }
-  // 데이터 반영 모드: 셀 크기가 값을 표현하므로 점/면적은 표시하지 않음
-  if (viewMode === 'block' && window.treemapMode === 'data') {
+  // 데이터 면적 모드: 셀 크기·색이 값을 표현하므로 점/면적은 표시하지 않음
+  if (viewMode === 'datamap' || (viewMode === 'block' && window.treemapMode === 'data')) {
     const dpr0 = window.devicePixelRatio || 1;
     const r0 = canvas.getBoundingClientRect();
     canvas.width = r0.width * dpr0;
@@ -5376,15 +5410,28 @@ function updateScatterAxisHint(xF, yF) {
 }
 
 function setView(mode) {
+  // 뷰(그래프)를 옮길 때마다 선택을 초기화 — 깨끗한 상태에서 시작
+  if (mode !== viewMode) {
+    active.clear();
+    document.querySelectorAll('.filter-btn.on').forEach(b => b.classList.remove('on'));
+    focusKey = null;
+    scatterX = null;
+    scatterY = null;
+    if (typeof refreshScatterBtns === 'function') refreshScatterBtns();
+    if (typeof updateLegend === 'function') updateLegend();      // 선택된 레이어 카드도 비움
+    if (typeof updateTopNStats === 'function') updateTopNStats();
+  }
   viewMode = mode;
   // 산점도 안내 팝업: 산점도가 아니면 숨김
   if (mode !== 'scatter') {
     const hint = document.getElementById('scatter-axis-hint');
     if (hint) hint.classList.remove('show');
   }
-  ['block','cartogram','timeline','scatter','chord'].forEach(m => {
+  ['block','cartogram','datamap','timeline','scatter','chord'].forEach(m => {
     document.getElementById('vt-' + m)?.classList.toggle('active', m === mode);
   });
+  // 트리맵 모드: 데이터 면적 뷰 = 데이터 비례, 그 외 트리맵 = 실 토지면적
+  window.treemapMode = (mode === 'datamap') ? 'data' : 'area';
   // 흐름 모드 — 사이드바에서 흐름 무관 섹션 숨김
   document.body.classList.toggle('chord-mode', mode === 'chord');
   // scatterOnly 필터 노출 토글 — 모드 변경 시 사이드바 재빌드
@@ -5400,13 +5447,18 @@ function setView(mode) {
   const bp = document.getElementById('block-pane');
   const cp = document.getElementById('carto-pane');
   const chp = document.getElementById('chord-pane');
-  bp.style.display = (mode === 'block' || mode === 'scatter') ? '' : 'none';
+  bp.style.display = (mode === 'block' || mode === 'scatter' || mode === 'datamap') ? '' : 'none';
   cp.style.display = (mode === 'cartogram') ? '' : 'none';
   if (chp) chp.style.display = (mode === 'chord') ? '' : 'none';
 
-  // 실 토지면적/데이터 반영 토글은 트리맵에서만 의미 있음 → 트리맵 뷰에서만 표시
-  const tmt = document.getElementById('tm-mode-toggle');
-  if (tmt) tmt.style.display = (mode === 'block') ? '' : 'none';
+  // 데이터 면적 뷰는 지표 1개만 — 여러 개 선택돼 있으면 가장 최근 1개만 유지
+  if (mode === 'datamap' && active.size > 1) {
+    const keep = [...active][active.size - 1];
+    active.clear();
+    active.add(keep);
+    document.querySelectorAll('.filter-btn').forEach(b =>
+      b.classList.toggle('on', b.dataset.key === keep));
+  }
 
   // 모드 변경 시 "모두 해제" 카운트가 산점도 축 포함 여부 반영하도록
   refreshActiveUI();
@@ -5430,9 +5482,20 @@ function setView(mode) {
     buildTimelineStrip();
     const el = document.getElementById('active-label');
     if (el) el.textContent = lang === 'en' ? 'Timeline · Population 2010 → 2024' : '시간축 · 인구 2010 → 2024';
+  } else if (mode === 'datamap') {
+    // 데이터 면적 — 값에 비례한 셀 크기 + 그라데이션, 점/면적은 숨김
+    d3.select(canvas).style('display', '');
+    const lbl = document.querySelector('#block-pane .view-pane-label');
+    if (lbl) lbl.textContent = lang === 'en' ? 'Treemap sized & shaded by data' : '데이터에 따른 면적 — 값이 클수록 크고 진하게';
+    buildViz();
+    const el = document.getElementById('active-label');
+    const names = [...active].map(k => fLabel(FILTERS.find(f => f.key === k)));
+    el.textContent = names.length ? names.join(' · ') : (lang === 'en' ? 'Pick one metric' : '지표 하나를 선택하세요');
   } else {
     // block (treemap)
     d3.select(canvas).style('display', '');
+    const lbl = document.querySelector('#block-pane .view-pane-label');
+    if (lbl) lbl.textContent = lang === 'en' ? 'Dot distribution over district areas' : '점 분포 — 자치구 면적 위 데이터';
     buildViz();
     const el = document.getElementById('active-label');
     const names = [...active].map(k => fLabel(FILTERS.find(f => f.key === k)));
@@ -6408,10 +6471,10 @@ const I18N = {
     'app-title': '하나의 서울,<br>25개의 도시',
     'app-desc': '면적 비례 블록과 왜상 통계지도로 서울 25개 자치구를 비교합니다',
     'sec-layer': '필터', 'sec-legend': '선택된 레이어', 'sec-rank': '순위 필터',
-    'sec-questions': '어디서부터 볼까',
-    'q-toggle': '어디서부터 볼까',
+    'sec-questions': '서울에서 궁금한 점은?',
+    'q-toggle': '서울에서 궁금한 점은?',
     'q-hint': '',
-    'reopen-q': '어디서부터 볼까',
+    'reopen-q': '서울에서 궁금한 점은?',
     'tf-all': '전체', 'tf-count': '수', 'tf-area': '면적',
     'sec-xaxis': 'X 축', 'sec-yaxis': 'Y 축',
     'rank-all': '전체 보기', 'rank-top': '상위', 'rank-bot': '하위',
@@ -6423,7 +6486,7 @@ const I18N = {
     'save-btn': '저장', 'saving': '저장 중…',
     'snapshot-btn': '스냅샷', 'export-btn': '내보내기 ▾',
     'export-png': 'PNG 저장', 'export-jpg': 'JPG 저장', 'export-svg': 'SVG 저장', 'export-pdf': 'PDF 내보내기',
-    'view-block': '트리맵', 'view-cartogram': '지도', 'view-timeline': '시간축', 'view-scatter': '산점도', 'view-chord': '통근',
+    'view-block': '점 분포', 'view-cartogram': '지도', 'view-datamap': '데이터 면적', 'view-timeline': '시간축', 'view-scatter': '산점도', 'view-chord': '통근',
     'tm-area': '실 토지면적', 'tm-data': '데이터 반영',
     'pane-timeline': '시간축 — 인구 변화 (2010 → 2024 예시)',
     'stamp-title': '저장된 스냅샷', 'stamp-empty': '저장된 스냅샷이 없습니다',
@@ -6434,7 +6497,7 @@ const I18N = {
     'cab-zero': '없음',
     'cab-suffix': '개 선택됨',
     'placeholder-tag': '준비 중',
-    'pane-block': '면적 비례 트리맵',
+    'pane-block': '점 분포 — 자치구 면적 위 데이터',
     'pane-carto': '지도 — 데이터 비례 변형',
     'seoul-total': '서울특별시 총면적 605.24 km²',
     'pane-carto-empty': '레이어를 선택하면 데이터에 따라 구의 크기가 달라집니다',
@@ -6446,10 +6509,10 @@ const I18N = {
     'app-title': 'One Seoul,<br>25 Cities',
     'app-desc': 'Compare 25 Seoul districts through area-proportional blocks and cartograms',
     'sec-layer': 'Filters', 'sec-legend': 'Selected Layers', 'sec-rank': 'Rank Filter',
-    'sec-questions': 'Where to start',
-    'q-toggle': 'Where to start',
+    'sec-questions': 'Curious about Seoul?',
+    'q-toggle': 'Curious about Seoul?',
     'q-hint': '',
-    'reopen-q': 'Where to start',
+    'reopen-q': 'Curious about Seoul?',
     'tf-all': 'All', 'tf-count': 'Count', 'tf-area': 'Area',
     'sec-xaxis': 'X Axis', 'sec-yaxis': 'Y Axis',
     'rank-all': 'All', 'rank-top': 'Top', 'rank-bot': 'Bottom',
@@ -6461,7 +6524,7 @@ const I18N = {
     'save-btn': 'Save', 'saving': 'Saving…',
     'snapshot-btn': 'Snapshots', 'export-btn': 'Export ▾',
     'export-png': 'Save PNG', 'export-jpg': 'Save JPG', 'export-svg': 'Save SVG', 'export-pdf': 'Export PDF',
-    'view-block': 'Treemap', 'view-cartogram': 'Map', 'view-timeline': 'Timeline', 'view-scatter': 'Scatter', 'view-chord': 'Commute',
+    'view-block': 'Dots', 'view-cartogram': 'Map', 'view-datamap': 'Data area', 'view-timeline': 'Timeline', 'view-scatter': 'Scatter', 'view-chord': 'Commute',
     'tm-area': 'Land Area', 'tm-data': 'Data Value',
     'pane-timeline': 'Timeline — Population change (2010 → 2024, demo)',
     'stamp-title': 'Saved Snapshots', 'stamp-empty': 'No saved snapshots',
@@ -6472,7 +6535,7 @@ const I18N = {
     'cab-zero': 'none',
     'cab-suffix': ' selected',
     'placeholder-tag': 'pending',
-    'pane-block': 'Area-proportional treemap',
+    'pane-block': 'Dot distribution over district areas',
     'pane-carto': 'Map — data-proportional',
     'seoul-total': 'Seoul total · 605.24 km²',
     'pane-carto-empty': 'Select a layer to warp district sizes by data',
@@ -6669,6 +6732,16 @@ const QUESTIONS = [
   { tag:'독서', text:'책과 가까운 곳은?', layers:['libraries','cultureVenues','daycarePreK'] },
   { tag:'창업', text:'창업하기 좋은 곳은?', layers:['workplaces','totalWorkers','commercialArea'] },
   { tag:'내집', text:'내 집 마련에 가성비 좋은 동네는?', layers:['housing','housePrice','subwayStations'] },
+  { tag:'반려동물', text:'반려동물과 산책하기 좋은 곳은?', layers:['parkArea','greenArea','riverArea'] },
+  { tag:'신혼', text:'신혼집 자리잡기 좋은 곳은?', layers:['housing','daycarePreK','subwayStations'] },
+  { tag:'청년', text:'청년이 살기 좋은 곳은?', layers:['singlePersonHH','workplaces','subwayStations'] },
+  { tag:'밤문화', text:'밤에 즐길 거리가 많은 곳은?', layers:['cinemaSeat','concertHall','selfEmploy'] },
+  { tag:'자연', text:'자연이 가까운 곳은?', layers:['greenArea','riverArea','parkArea'] },
+  { tag:'교육열', text:'학구열이 높은 곳은?', layers:['highSchools','libraries','daycarePreK'] },
+  { tag:'직주근접', text:'직장과 가까이 살기 좋은 곳은?', layers:['workplaces','subwayStations','housing'] },
+  { tag:'번화가', text:'번화하고 활기찬 곳은?', layers:['commercialArea','selfEmploy','workplaces'] },
+  { tag:'한적함', text:'조용하고 한적하게 살고 싶다면?', layers:['greenArea','parkArea','forestArea'] },
+  { tag:'복지', text:'복지·돌봄이 잘 갖춰진 곳은?', layers:['welfare','medical','elderly'] },
 ];
 const QUESTIONS_EN = [
   { tag:'Art', text:'Where might an artist live?', layers:['cultureVenues','cinemaSeat','concertHall'] },
@@ -6691,6 +6764,16 @@ const QUESTIONS_EN = [
   { tag:'Reading', text:'Closest to books?', layers:['libraries','cultureVenues','daycarePreK'] },
   { tag:'Startup', text:'Where to start a business?', layers:['workplaces','totalWorkers','commercialArea'] },
   { tag:'Home', text:'Best value to buy a home?', layers:['housing','housePrice','subwayStations'] },
+  { tag:'Pets', text:'Best for walking your pet?', layers:['parkArea','greenArea','riverArea'] },
+  { tag:'Newlywed', text:'Where to settle as newlyweds?', layers:['housing','daycarePreK','subwayStations'] },
+  { tag:'Youth', text:'Where for young people to live?', layers:['singlePersonHH','workplaces','subwayStations'] },
+  { tag:'Nightlife', text:'Where is nightlife rich?', layers:['cinemaSeat','concertHall','selfEmploy'] },
+  { tag:'Nature', text:'Where is nature closest?', layers:['greenArea','riverArea','parkArea'] },
+  { tag:'Academics', text:'Where is study culture strong?', layers:['highSchools','libraries','daycarePreK'] },
+  { tag:'Near work', text:'Best to live near the office?', layers:['workplaces','subwayStations','housing'] },
+  { tag:'Downtown', text:'Where is it most lively?', layers:['commercialArea','selfEmploy','workplaces'] },
+  { tag:'Calm', text:'Where to live quietly?', layers:['greenArea','parkArea','forestArea'] },
+  { tag:'Welfare', text:'Where is care best provided?', layers:['welfare','medical','elderly'] },
 ];
 
 // ── 시작 질문 — 한 번에 1개만 보이게, 카드의 ↻ 로 다른 질문으로 교체 ──
@@ -7509,8 +7592,9 @@ function applyQuestion(idx) {
   updateLegend();
   updateTopNStats();
   redrawDots();
-  // 클릭 후 팝업은 collapse (다시 펼칠 수 있게 유지)
+  // 클릭 후 팝업은 collapse (헤더만 남김) — 이후 idle 자동 펼침도 끔
   document.getElementById('q-popup')?.classList.add('collapsed');
+  _qAnswered = true;
 }
 
 function toggleQuestionsPopup() {
@@ -7539,10 +7623,12 @@ function openQuestionsPopup() {
   resetIdlePopupTimer();
 }
 
-// 20초간 마우스 멈춤 → 시작 질문 팝업 자동 펼침
+// 20초간 마우스 멈춤 → 시작 질문 팝업 자동 펼침 (단, 사용자가 질문을 한 번 고르면 비활성)
 let _idlePopupTimer = null;
+let _qAnswered = false;
 function resetIdlePopupTimer() {
   if (_idlePopupTimer) { clearTimeout(_idlePopupTimer); _idlePopupTimer = null; }
+  if (_qAnswered) return;
   _idlePopupTimer = setTimeout(() => {
     const popup = document.getElementById('q-popup');
     if (!popup) return;
