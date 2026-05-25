@@ -2034,13 +2034,31 @@ body.chord-mode #chord-controls { display: block !important; }
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  color: #c0bdb7;
-  font-weight: 300;
-  letter-spacing: 0.5px;
+  gap: 8px;
   pointer-events: none;
+  text-align: center;
+  padding: 0 18px;
+}
+.carto-empty .ce-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.2px;
+  background: rgba(236,234,229,0.86);
+  padding: 3px 14px;
+  border-radius: 4px;
+}
+.carto-empty .ce-desc {
+  font-size: 11.5px;
+  font-weight: 300;
+  color: #6a6660;
+  letter-spacing: 0.2px;
+  background: rgba(236,234,229,0.86);
+  padding: 3px 12px;
+  border-radius: 4px;
 }
 
 .cell:hover > .bg-rect { fill: #e2dfd8 !important; }
@@ -2919,7 +2937,10 @@ body.chord-mode #chord-controls { display: block !important; }
     <div class="view-pane" id="carto-pane" style="display:none">
       <div class="view-pane-label" data-i18n="pane-carto">지도 — 데이터 비례 변형</div>
       <div class="carto-driver-label" id="carto-driver" style="display:none"></div>
-      <div class="carto-empty" id="carto-empty" data-i18n="pane-carto-empty">레이어를 선택하면 데이터에 따라 구의 크기가 달라집니다</div>
+      <div class="carto-empty" id="carto-empty">
+        <div class="ce-title" data-i18n="carto-guide-title">데이터로 부풀고 줄어드는 지도</div>
+        <div class="ce-desc" data-i18n="carto-guide-desc">지표를 선택하면 값에 따라 자치구 모양이 커지거나 작아집니다</div>
+      </div>
     </div>
     <div class="view-pane" id="chord-pane" style="display:none">
       <div class="view-pane-label" data-i18n="pane-chord">통근 — 자치구 간 이동 흐름</div>
@@ -4479,7 +4500,7 @@ function redrawCartogram() {
   const driverLbl = document.getElementById('carto-driver');
 
   if (!driverF) {
-    // 비활성 상태 — 베이스만
+    // 비활성 상태 — 베이스 지도(회색) + 중앙 안내
     if (empty) empty.style.display = '';
     if (driverLbl) driverLbl.style.display = 'none';
     cartoSvg.selectAll('.carto-cell').each(function() {
@@ -4797,6 +4818,13 @@ function getLayoutForCurrentMode() {
 }
 
 function buildViz() {
+  // 선택이 하나도 없으면 빈 상태 안내 (점 분포·데이터 면적)
+  if (active.size === 0 && (viewMode === 'block' || viewMode === 'datamap')) {
+    leaves = null;
+    drawViewGuide(viewMode);
+    try { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); } catch (e) {}
+    return;
+  }
   const guMap = Object.fromEntries(GU.map(g => [g.name, g]));
   const layout = getLayoutForCurrentMode();
   leaves = layout.map(l => ({ ...l, data: guMap[l.name] || { name: l.name, area: 0 } }));
@@ -5810,38 +5838,68 @@ function toggleChordPlay() {
 }
 
 // 산점도 빈 상태 안내 — 두 지표를 X·Y로 비교한다는 사용법을 그래프 중앙에 표시
-function drawScatterGuide() {
-  const rect = chartEl.getBoundingClientRect();
+// 뷰별 빈 상태 안내 텍스트 (제목 / 설명)
+const VIEW_GUIDE_TXT = {
+  block:   { ko:['자치구 면적 위에 데이터를 점으로', '지표를 선택하면 자치구마다 데이터가 점으로 흩뿌려집니다 — 빽빽할수록 많은 곳'],
+             en:['Data as dots over district areas', 'Pick a layer — each district fills with dots by its value'] },
+  datamap: { ko:['데이터 크기로 본 자치구', '지표 하나를 선택하면 값이 클수록 셀이 크고 진하게 표현됩니다'],
+             en:['Districts sized by data', 'Pick one metric — bigger and darker means a higher value'] },
+  scatter: { ko:['두 지표를 X · Y축으로 비교해보세요', '사이드바에서 지표를 2개 선택하세요 — 먼저 고른 것이 X축, 다음이 Y축'],
+             en:['Compare two metrics on X · Y', 'Pick two layers — first becomes X, second becomes Y'] },
+  cartogram:{ ko:['데이터로 부풀고 줄어드는 지도', '지표를 선택하면 값에 따라 자치구 모양이 커지거나 작아집니다'],
+             en:['A map warped by data', 'Pick a layer — districts swell or shrink by value'] },
+};
+
+function drawGuideIllustration(ill, mode, font) {
+  if (mode === 'scatter') {
+    const L = 52;
+    ill.append('line').attr('x1',-L/2).attr('y1',L/2).attr('x2',-L/2).attr('y2',-L/2).attr('stroke','#c4bfb6').attr('stroke-width',1.4);
+    ill.append('line').attr('x1',-L/2).attr('y1',L/2).attr('x2',L/2).attr('y2',L/2).attr('stroke','#c4bfb6').attr('stroke-width',1.4);
+    [[-14,6],[2,-10],[16,-22],[-4,12],[10,-4]].forEach(([dx,dy]) =>
+      ill.append('circle').attr('cx',dx).attr('cy',dy).attr('r',3.4).attr('fill','#1a1a1a').attr('opacity',0.55));
+    ill.append('text').attr('x',L/2+6).attr('y',L/2+4).attr('text-anchor','start').attr('font-family',font).attr('font-size',9).attr('font-weight',600).attr('fill','#b0aca6').text('X');
+    ill.append('text').attr('x',-L/2-6).attr('y',-L/2+2).attr('text-anchor','end').attr('font-family',font).attr('font-size',9).attr('font-weight',600).attr('fill','#b0aca6').text('Y');
+  } else if (mode === 'datamap') {
+    ill.append('rect').attr('x',-30).attr('y',-26).attr('width',34).attr('height',52).attr('rx',2).attr('fill','#1a1a1a').attr('opacity',0.6);
+    ill.append('rect').attr('x',7).attr('y',-26).attr('width',24).attr('height',30).attr('rx',2).attr('fill','#1a1a1a').attr('opacity',0.34);
+    ill.append('rect').attr('x',7).attr('y',7).attr('width',24).attr('height',19).attr('rx',2).attr('fill','#1a1a1a').attr('opacity',0.2);
+  } else if (mode === 'cartogram') {
+    ill.append('path').attr('d','M -26 -8 Q -22 -28 2 -22 Q 28 -16 24 6 Q 20 26 -3 22 Q -30 16 -26 -8 Z')
+      .attr('fill','none').attr('stroke','#c4bfb6').attr('stroke-width',1.4);
+    ill.append('circle').attr('cx',-2).attr('cy',0).attr('r',3).attr('fill','#1a1a1a').attr('opacity',0.4);
+  } else {
+    // block (점 분포) — 사각형 안에 점들
+    const S = 56;
+    ill.append('rect').attr('x',-S/2).attr('y',-S/2).attr('width',S).attr('height',S).attr('rx',3).attr('fill','none').attr('stroke','#c4bfb6').attr('stroke-width',1.4);
+    [[-16,-12],[-2,-16],[12,-8],[-12,4],[4,8],[16,12],[-6,14],[8,-2],[0,2],[-18,10]].forEach(([dx,dy]) =>
+      ill.append('circle').attr('cx',dx).attr('cy',dy).attr('r',2.6).attr('fill','#1a1a1a').attr('opacity',0.5));
+  }
+}
+
+// 모든 뷰 공통 빈 상태 안내 — 산점도 스타일(일러스트 + 제목 + 설명)
+function drawViewGuide(mode) {
+  const isCarto = mode === 'cartogram';
+  const targetSvg = isCarto ? cartoSvg : svg;
+  const el = isCarto ? cartoEl : chartEl;
+  const rect = el.getBoundingClientRect();
   const W = rect.width, H = rect.height;
-  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'none');
-  svg.selectAll('*').remove();
+  targetSvg.attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'none');
+  targetSvg.selectAll('*').remove();
   const font = "'Pretendard','Apple SD Gothic Neo',sans-serif";
   const cx = W / 2, cy = H / 2;
-  const g = svg.append('g').attr('text-anchor', 'middle');
+  const g = targetSvg.append('g').attr('text-anchor', 'middle');
 
-  // 미니 X·Y 축 일러스트
-  const ax = cx, ay = cy - 86, L = 52;
-  const axis = g.append('g').attr('transform', `translate(${ax},${ay})`);
-  axis.append('line').attr('x1', -L/2).attr('y1', L/2).attr('x2', -L/2).attr('y2', -L/2)
-    .attr('stroke', '#c4bfb6').attr('stroke-width', 1.4);
-  axis.append('line').attr('x1', -L/2).attr('y1', L/2).attr('x2', L/2).attr('y2', L/2)
-    .attr('stroke', '#c4bfb6').attr('stroke-width', 1.4);
-  [[-14, 6],[2,-10],[16,-22],[-4,12],[10,-4]].forEach(([dx,dy]) =>
-    axis.append('circle').attr('cx', dx).attr('cy', dy).attr('r', 3.4)
-      .attr('fill', '#1a1a1a').attr('opacity', 0.55));
-  axis.append('text').attr('x', L/2 + 6).attr('y', L/2 + 4).attr('text-anchor', 'start')
-    .attr('font-family', font).attr('font-size', 9).attr('font-weight', 600).attr('fill', '#b0aca6').text('X');
-  axis.append('text').attr('x', -L/2 - 6).attr('y', -L/2 + 2).attr('text-anchor', 'end')
-    .attr('font-family', font).attr('font-size', 9).attr('font-weight', 600).attr('fill', '#b0aca6').text('Y');
+  const ill = g.append('g').attr('transform', `translate(${cx},${cy - 86})`);
+  drawGuideIllustration(ill, mode, font);
 
+  const t = VIEW_GUIDE_TXT[mode] || VIEW_GUIDE_TXT.block;
+  const [title, desc] = (lang === 'en') ? t.en : t.ko;
   g.append('text').attr('x', cx).attr('y', cy + 4)
     .attr('font-family', font).attr('font-size', 16).attr('font-weight', 600).attr('fill', '#1a1a1a')
-    .text(lang === 'en' ? 'Compare two metrics on X · Y' : '두 지표를 X · Y축으로 비교해보세요');
+    .text(title);
   g.append('text').attr('x', cx).attr('y', cy + 30)
     .attr('font-family', font).attr('font-size', 11.5).attr('font-weight', 300).attr('fill', '#8a8680')
-    .text(lang === 'en'
-      ? 'Pick two layers from the sidebar — first becomes X, second becomes Y'
-      : '사이드바에서 지표를 2개 선택하세요 — 먼저 고른 것이 X축, 다음이 Y축');
+    .text(desc);
 }
 
 function buildScatter() {
@@ -5870,7 +5928,7 @@ function buildScatter() {
 
   // 둘 다 없으면 빈 상태 — 사용법 안내
   if (!xF && !yF) {
-    drawScatterGuide();
+    drawViewGuide('scatter');
     return;
   }
 
@@ -6536,6 +6594,8 @@ const I18N = {
     'pane-carto': '지도 — 데이터 비례 변형',
     'seoul-total': '서울특별시 총면적 605.24 km²',
     'pane-carto-empty': '레이어를 선택하면 데이터에 따라 구의 크기가 달라집니다',
+    'carto-guide-title': '데이터로 부풀고 줄어드는 지도',
+    'carto-guide-desc': '지표를 선택하면 값에 따라 자치구 모양이 커지거나 작아집니다',
     'carto-driver-prefix': '기준',
     'dot-abbr': '점',
   },
@@ -6574,6 +6634,8 @@ const I18N = {
     'pane-carto': 'Map — data-proportional',
     'seoul-total': 'Seoul total · 605.24 km²',
     'pane-carto-empty': 'Select a layer to warp district sizes by data',
+    'carto-guide-title': 'A map warped by data',
+    'carto-guide-desc': 'Pick a layer — districts swell or shrink by value',
     'carto-driver-prefix': 'Driver',
     'dot-abbr': 'dots',
   }
