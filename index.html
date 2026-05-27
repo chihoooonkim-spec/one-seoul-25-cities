@@ -2584,6 +2584,9 @@ body.chord-mode #chord-controls { display: block !important; }
   margin-top: -8px;
 }
 .type-filter .tf-btn { flex: 1; padding: 0; }
+/* 산점도 모드: 수치 지표만 쓰므로 "필터" 라벨과 수/면적 토글 숨김 */
+body.scatter-mode .type-filter,
+body.scatter-mode #block-controls > .section-label[data-i18n="sec-layer"] { display: none; }
 
 /* L2: 카테고리 헤더 — 거주/일/여가/교육/안전/교통 */
 .filter-cat-label {
@@ -3515,6 +3518,8 @@ function seededRng(seed) {
 
 // ── 사이드바 버튼 생성 ──
 function filterMatchesType(f) {
+  // 산점도는 수치(count) 지표만 — 면적 지표는 X·Y 비교에 부적합
+  if (window.viewMode === 'scatter') return !f.areaFill;
   if (typeFilter === 'all') return true;
   const isArea = !!f.areaFill;
   return typeFilter === 'area' ? isArea : !isArea;
@@ -3608,6 +3613,10 @@ function toggle(key) {
   }
 
   const wasOn = active.has(key);
+  // 뷰별 동시 선택 최대 개수
+  const MAX = ({ block: 5, cartogram: 5, scatter: 2 })[viewMode] || 99;
+  if (!wasOn && active.size >= MAX) { showCapToast(MAX); return; }
+
   if (wasOn) active.delete(key);
   else active.add(key);
   document.querySelectorAll(`.filter-btn[data-key="${key}"]`).forEach(b => b.classList.toggle('on', active.has(key)));
@@ -3616,11 +3625,14 @@ function toggle(key) {
   updateTopNStats();
   // 새로 켰을 때만 도트 비 애니메이션 (G)
   if (!wasOn) startDotRain(key);
-  // 트리맵 데이터 비례 모드면 셀 크기를 새 값으로 다시 계산
-  if (window.treemapMode === 'data' && viewMode === 'block') {
-    buildViz();
+
+  // 점 분포: 빈 상태↔셀 전환 시 재빌드(셀 복원), 그 외엔 점만 갱신
+  if (viewMode === 'block') {
+    if (active.size === 0 || !leaves) buildViz();
+    else redrawDots();
+  } else {
+    redrawDots();
   }
-  redrawDots();
 }
 
 // ── G: 도트 비 애니메이션 (filter on 시 점이 위에서 떨어져 자리잡음) ──
@@ -4098,10 +4110,12 @@ function setTypeFilter(t) {
 
 // ── 동시 레이어 cap 토스트 ──
 let capToastTimer = null;
-function showCapToast() {
+function showCapToast(max) {
   const el = document.getElementById('cap-toast');
   if (!el) return;
-  el.textContent = t('layer-cap');
+  el.textContent = (typeof max === 'number')
+    ? ((lang === 'en') ? `Up to ${max} layers at a time` : `한 번에 최대 ${max}개까지 선택할 수 있어요`)
+    : t('layer-cap');
   el.classList.add('show');
   clearTimeout(capToastTimer);
   capToastTimer = setTimeout(() => el.classList.remove('show'), 1600);
@@ -4674,32 +4688,30 @@ function redrawCartogram() {
       .attr('opacity', labelInsideFill ? 0.85 : 0.55)
       .attr('fill', labelInsideFill ? 'rgba(250,250,246,0.85)' : '#1a1a1a');
 
-    // count 모드: 자치구 모양 안에 점 채우기 — 균등 분포 + 모든 점 동일 크기
+    // count 모드: 자치구 모양 안에 점 채우기 — 선택한 모든 count 레이어를 한 번에 표시
     const dotsG = sel.select('.carto-dots');
     dotsG.selectAll('*').remove();
-    if (isCountFilter) {
-      const dotCount = Math.round(val / driverF.dotUnit);
-      if (dotCount > 0) {
-        const shapeNode = sel.select('.carto-shape').node();
-        // 모든 점 동일 크기 — 트리맵과 같은 시각적 균일성. 절반 크기로
-        const DOT_R = 2.5;
-        const points = placeDotsInPath(shapeNode, p, dotCount, name + driverF.key, DOT_R);
-        // splitKeys 처리 (성별/학교 유형 등)
-        let firstCount = 0;
-        if (driverF.splitKeys) {
-          firstCount = Math.round((data[driverF.splitKeys[0]] || 0) / driverF.dotUnit);
-        }
-        for (let i = 0; i < points.length; i++) {
-          const fill = driverF.splitKeys
-            ? (i < firstCount ? driverF.splitColors[0] : driverF.splitColors[1])
-            : driverF.color;
-          dotsG.append('circle')
-            .attr('cx', points[i].x).attr('cy', points[i].y).attr('r', DOT_R)
-            .attr('fill', fill)
-            .attr('opacity', 0.92);
-        }
+    const shapeNode = sel.select('.carto-shape').node();
+    const DOT_R = 2.5;
+    const countFilters = [...active]
+      .map(k => FILTERS.find(f => f.key === k))
+      .filter(f => f && !f.areaFill && f.dotUnit);
+    countFilters.forEach(cf => {
+      const dotCount = Math.round(valOf(cf, data) / cf.dotUnit);
+      if (dotCount <= 0) return;
+      const points = placeDotsInPath(shapeNode, p, dotCount, name + cf.key, DOT_R);
+      let firstCount = 0;
+      if (cf.splitKeys) firstCount = Math.round((data[cf.splitKeys[0]] || 0) / cf.dotUnit);
+      for (let i = 0; i < points.length; i++) {
+        const fill = cf.splitKeys
+          ? (i < firstCount ? cf.splitColors[0] : cf.splitColors[1])
+          : cf.color;
+        dotsG.append('circle')
+          .attr('cx', points[i].x).attr('cy', points[i].y).attr('r', DOT_R)
+          .attr('fill', fill)
+          .attr('opacity', 0.9);
       }
-    }
+    });
   });
 }
 
@@ -5492,6 +5504,8 @@ function setView(mode) {
   window.treemapMode = (mode === 'datamap') ? 'data' : 'area';
   // 흐름 모드 — 사이드바에서 흐름 무관 섹션 숨김
   document.body.classList.toggle('chord-mode', mode === 'chord');
+  // 산점도 모드 — 수치 지표만 쓰므로 수/면적 타입 필터 숨김
+  document.body.classList.toggle('scatter-mode', mode === 'scatter');
   // scatterOnly 필터 노출 토글 — 모드 변경 시 사이드바 재빌드
   if (typeof buildFilterBtnsGrouped === 'function') buildFilterBtnsGrouped('fbtn-wrap');
   // controls(사이드바 X/Y 축 등)
