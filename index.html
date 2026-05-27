@@ -317,7 +317,7 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   color: #1a1a1a;
   line-height: 1.2;
   letter-spacing: -0.4px;
-  padding-bottom: 18px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #c8c5be;
   margin-bottom: 0;
 }
@@ -338,7 +338,7 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   color: #8e8a82;
   line-height: 1.85;
   letter-spacing: 0.1px;
-  padding: 18px 0 6px;
+  padding: 8px 0 6px;
   margin-bottom: 0;
 }
 .app-more {
@@ -375,7 +375,7 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 .section-label.section-label-with-clear {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
 }
 .section-label.section-label-with-clear > span:first-child {
@@ -386,6 +386,7 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   background: transparent;
   padding: 0;
   margin: 0;
+  height: auto;
   font-family: inherit;
   font-size: 9px;
   letter-spacing: 1.6px;
@@ -394,10 +395,15 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   color: #b0aca6;
   cursor: pointer;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  line-height: 1;
   gap: 6px;
   transition: color 0.15s;
   min-height: 0;
+}
+.section-label.section-label-with-clear .clear-all-btn .cab-count {
+  border-left: none;
+  padding-left: 0;
 }
 .section-label.section-label-with-clear .clear-all-btn:not(:disabled):hover {
   color: #1a1a1a;
@@ -2042,23 +2048,18 @@ body.chord-mode #chord-controls { display: block !important; }
   text-align: center;
   padding: 0 18px;
 }
+.carto-empty .ce-illust { width: 84px; height: 84px; margin-bottom: 14px; display: block; }
 .carto-empty .ce-title {
   font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
   letter-spacing: -0.2px;
-  background: rgba(236,234,229,0.86);
-  padding: 3px 14px;
-  border-radius: 4px;
 }
 .carto-empty .ce-desc {
   font-size: 11.5px;
   font-weight: 300;
-  color: #6a6660;
+  color: #8a8680;
   letter-spacing: 0.2px;
-  background: rgba(236,234,229,0.86);
-  padding: 3px 12px;
-  border-radius: 4px;
 }
 
 .cell:hover > .bg-rect { fill: #e2dfd8 !important; }
@@ -2938,6 +2939,10 @@ body.chord-mode #chord-controls { display: block !important; }
       <div class="view-pane-label" data-i18n="pane-carto">지도 — 데이터 비례 변형</div>
       <div class="carto-driver-label" id="carto-driver" style="display:none"></div>
       <div class="carto-empty" id="carto-empty">
+        <svg class="ce-illust" viewBox="-42 -42 84 84" aria-hidden="true">
+          <path d="M -26 -8 Q -22 -28 2 -22 Q 28 -16 24 6 Q 20 26 -3 22 Q -30 16 -26 -8 Z" fill="none" stroke="#c4bfb6" stroke-width="1.6"/>
+          <circle cx="-2" cy="0" r="3.2" fill="#1a1a1a" opacity="0.45"/>
+        </svg>
         <div class="ce-title" data-i18n="carto-guide-title">데이터로 부풀고 줄어드는 지도</div>
         <div class="ce-desc" data-i18n="carto-guide-desc">지표를 선택하면 값에 따라 자치구 모양이 커지거나 작아집니다</div>
       </div>
@@ -4500,16 +4505,13 @@ function redrawCartogram() {
   const driverLbl = document.getElementById('carto-driver');
 
   if (!driverF) {
-    // 비활성 상태 — 베이스 지도(회색) + 중앙 안내
+    // 비활성 상태 — 베이스 지도를 완전히 숨기고 다른 뷰와 동일하게 중앙 안내만 표시
     if (empty) empty.style.display = '';
     if (driverLbl) driverLbl.style.display = 'none';
+    cartoSvg.style('opacity', 0);
     cartoSvg.selectAll('.carto-cell').each(function() {
       const sel = d3.select(this);
       sel.attr('transform', null);
-      sel.select('.carto-shape').attr('fill', '#bdb6a8').attr('opacity', 0.4);
-      sel.select('.carto-label').attr('opacity', 0.78).attr('fill', 'rgba(20,20,20,0.82)').attr('font-size', '25px');
-      sel.select('.carto-area').attr('opacity', 0.55).attr('fill', 'rgba(20,20,20,0.55)');
-      // 잔재 점·면적 채움 정리
       sel.select('.carto-dots').selectAll('*').remove();
       sel.selectAll('.carto-area-fill').remove();
     });
@@ -4517,6 +4519,7 @@ function redrawCartogram() {
   }
 
   if (empty) empty.style.display = 'none';
+  cartoSvg.style('opacity', 1);
 
   // 활성 토지용도(zoning) 필터들 — 같은 그룹은 겹치지 않게 stack
   const zoningActive = [...active]
