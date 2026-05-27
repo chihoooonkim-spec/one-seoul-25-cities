@@ -1095,10 +1095,40 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   top: 82px !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: 30px !important;
+  bottom: 56px !important;
   width: auto !important;
   height: auto !important;
 }
+/* 점 분포 배경 토글 (트리맵 ↔ 지도) — 그래프 하단 중앙 */
+.dots-bg-toggle {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  gap: 0;
+  z-index: 30;
+  background: #fafaf6;
+  border: 1px solid #d8d6d0;
+  border-radius: 3px;
+  padding: 2px;
+}
+.dots-bg-toggle.show { display: flex; }
+.dbg-btn {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 9.5px;
+  letter-spacing: 0.6px;
+  font-weight: 500;
+  color: #6a6660;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+.dbg-btn:hover { color: #1a1a1a; }
+.dbg-btn.active { background: #1a1a1a; color: #f0ede7; }
 /* block-pane 좌상단 라벨은 제목 오버레이와 중복 → 숨김 */
 #block-pane > .view-pane-label { display: none; }
 
@@ -2903,9 +2933,8 @@ body.scatter-mode #block-controls > .section-label[data-i18n="sec-layer"] { disp
     <span data-i18n="topbar-desc">서울특별시 25개 자치구 · 셀 크기 = 실제 면적(km²)</span>
     <div class="tb-actions">
       <div class="view-toggle">
-        <button class="vt-btn active" id="vt-block" onclick="setView('block')" data-i18n="view-block" title="자치구 면적 셀 위에 데이터를 점으로 분포">점 분포</button>
+        <button class="vt-btn active" id="vt-block" onclick="setView('block')" data-i18n="view-block" title="데이터를 점으로 분포 — 트리맵 또는 실제 지도 위에">점 분포</button>
         <button class="vt-btn" id="vt-datamap" onclick="setView('datamap')" data-i18n="view-datamap" title="지표 하나를 골라 값에 따라 셀 크기·색이 달라지는 트리맵">데이터 면적</button>
-        <button class="vt-btn" id="vt-cartogram" onclick="setView('cartogram')" data-i18n="view-cartogram">지도</button>
         <button class="vt-btn" id="vt-scatter" onclick="setView('scatter')" data-i18n="view-scatter" title="지표 2개를 골라 X·Y축으로 비교">산점도</button>
         <button class="vt-btn" id="vt-chord" onclick="setView('chord')" data-i18n="view-chord" title="자치구 간 통근 이동 흐름">통근</button>
       </div>
@@ -2934,6 +2963,10 @@ body.scatter-mode #block-controls > .section-label[data-i18n="sec-layer"] { disp
       <div class="ct-kicker">ONE SEOUL · 25 CITIES</div>
       <div class="ct-name" id="ct-name">서울 25개 자치구</div>
     </div>
+    <div class="dots-bg-toggle" id="dots-bg-toggle">
+      <button class="dbg-btn active" data-bg="treemap" onclick="setDotsBg('treemap')">트리맵</button>
+      <button class="dbg-btn" data-bg="map" onclick="setDotsBg('map')">지도</button>
+    </div>
     <div class="view-pane" id="block-pane">
       <div class="view-pane-label" data-i18n="pane-block">점 분포 — 자치구 면적 위 데이터</div>
       <div class="view-pane-foot" id="block-pane-foot" data-i18n="seoul-total">서울특별시 총면적 605.24 km²</div>
@@ -2946,8 +2979,8 @@ body.scatter-mode #block-controls > .section-label[data-i18n="sec-layer"] { disp
           <path d="M -26 -8 Q -22 -28 2 -22 Q 28 -16 24 6 Q 20 26 -3 22 Q -30 16 -26 -8 Z" fill="none" stroke="#c4bfb6" stroke-width="1.6"/>
           <circle cx="-2" cy="0" r="3.2" fill="#1a1a1a" opacity="0.45"/>
         </svg>
-        <div class="ce-title" data-i18n="carto-guide-title">데이터로 부풀고 줄어드는 지도</div>
-        <div class="ce-desc" data-i18n="carto-guide-desc">지표를 선택하면 값에 따라 자치구 모양이 커지거나 작아집니다</div>
+        <div class="ce-title" data-i18n="carto-guide-title">서울 지도 위에 데이터를 점으로</div>
+        <div class="ce-desc" data-i18n="carto-guide-desc">지표를 선택하면 실제 자치구 위에 데이터가 점으로 분포합니다</div>
       </div>
     </div>
     <div class="view-pane" id="chord-pane" style="display:none">
@@ -5497,9 +5530,16 @@ function setView(mode) {
     const hint = document.getElementById('scatter-axis-hint');
     if (hint) hint.classList.remove('show');
   }
-  ['block','cartogram','datamap','timeline','scatter','chord'].forEach(m => {
-    document.getElementById('vt-' + m)?.classList.toggle('active', m === mode);
+  // 지도(cartogram)는 별도 탭 없이 점 분포(block)의 '지도' 배경 → vt-block을 활성 표시
+  ['block','datamap','timeline','scatter','chord'].forEach(m => {
+    document.getElementById('vt-' + m)?.classList.toggle('active', m === mode || (m === 'block' && mode === 'cartogram'));
   });
+  // 점 분포(트리맵/지도) 배경 토글 노출 + 현재 배경 동기화
+  const _dbt = document.getElementById('dots-bg-toggle');
+  if (_dbt) _dbt.classList.toggle('show', mode === 'block' || mode === 'cartogram');
+  if (mode === 'block') window.blockBg = 'treemap';
+  else if (mode === 'cartogram') window.blockBg = 'map';
+  document.querySelectorAll('.dbg-btn').forEach(b => b.classList.toggle('active', b.dataset.bg === window.blockBg));
   // 트리맵 모드: 데이터 면적 뷰 = 데이터 비례, 그 외 트리맵 = 실 토지면적
   window.treemapMode = (mode === 'datamap') ? 'data' : 'area';
   // 흐름 모드 — 사이드바에서 흐름 무관 섹션 숨김
@@ -5573,6 +5613,28 @@ function setView(mode) {
     const names = [...active].map(k => fLabel(FILTERS.find(f => f.key === k)));
     el.textContent = names.length ? names.join(' · ') : t('label-empty');
   }
+}
+
+// 점 분포 배경 전환: 트리맵(면적 셀) ↔ 지도(실제 자치구 모양) — 선택은 유지
+function setDotsBg(bg) {
+  window.blockBg = bg;
+  viewMode = (bg === 'map') ? 'cartogram' : 'block';
+  document.querySelectorAll('.dbg-btn').forEach(b => b.classList.toggle('active', b.dataset.bg === bg));
+  const bp = document.getElementById('block-pane');
+  const cp = document.getElementById('carto-pane');
+  if (bg === 'map') {
+    bp.style.display = 'none';
+    cp.style.display = '';
+    d3.select(canvas).style('display', 'none');
+    redrawCartogram();
+  } else {
+    bp.style.display = '';
+    cp.style.display = 'none';
+    d3.select(canvas).style('display', '');
+    buildViz();
+  }
+  refreshActiveUI();
+  updateChartTitle();
 }
 
 // ── Chord (흐름) 뷰 — 25 자치구 간 통근 OD 매트릭스 (실제 KT 생활이동 데이터, 시간대별) ──
@@ -6611,8 +6673,8 @@ const I18N = {
     'pane-carto': '지도 — 데이터 비례 변형',
     'seoul-total': '서울특별시 총면적 605.24 km²',
     'pane-carto-empty': '레이어를 선택하면 데이터에 따라 구의 크기가 달라집니다',
-    'carto-guide-title': '데이터로 부풀고 줄어드는 지도',
-    'carto-guide-desc': '지표를 선택하면 값에 따라 자치구 모양이 커지거나 작아집니다',
+    'carto-guide-title': '서울 지도 위에 데이터를 점으로',
+    'carto-guide-desc': '지표를 선택하면 실제 자치구 위에 데이터가 점으로 분포합니다',
     'carto-driver-prefix': '기준',
     'dot-abbr': '점',
   },
@@ -6651,7 +6713,7 @@ const I18N = {
     'pane-carto': 'Map — data-proportional',
     'seoul-total': 'Seoul total · 605.24 km²',
     'pane-carto-empty': 'Select a layer to warp district sizes by data',
-    'carto-guide-title': 'A map warped by data',
+    'carto-guide-title': 'Dots on the real Seoul map',
     'carto-guide-desc': 'Pick a layer — districts swell or shrink by value',
     'carto-driver-prefix': 'Driver',
     'dot-abbr': 'dots',
