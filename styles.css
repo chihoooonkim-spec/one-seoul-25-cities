@@ -14,13 +14,13 @@ body {
   gap: 0;
 }
 .app-frame {
-  display: flex;
-  flex-direction: row;
+  display: block;
   height: calc(100vh - 24px);
-  flex-shrink: 0;
-  gap: 0;
-  /* main을 화면 중앙으로 — JS가 사이드바 폭을 실측해 padding-right에 동기화 */
+  /* 사이드바 폭만큼 좌/우 패딩 → main이 화면 정중앙에 옴 (사이드바는 fixed) */
+  padding-left: 210px;
+  padding-right: 210px;
   box-sizing: border-box;
+  position: relative;
 }
 
 /* ── 트리맵 모드 토글 (실 토지면적 ↔ 데이터 반영) ── */
@@ -270,6 +270,10 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
 
 /* ── 사이드바 ── */
 .sidebar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  bottom: 12px;
   width: 210px;
   min-width: 210px;
   background: #f4f3ef;
@@ -279,6 +283,8 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   flex-direction: column;
   gap: 0;
   overflow-y: auto;
+  z-index: 30;
+  box-sizing: border-box;
 }
 
 /* 브랜드 태그 (최상단 작은 캡스 — 가벼운 톤) */

@@ -187,10 +187,9 @@
 
   <!-- 시작 질문 — 하단 고정 팝업 -->
   <div class="q-popup" id="q-popup">
-    <div class="q-popup-head" onclick="toggleQuestionsPopup()">
+    <div class="q-popup-head">
       <span class="q-popup-title" data-i18n="sec-questions">서울에서 궁금한 점은?</span>
-      <button class="q-popup-toggle" id="q-popup-toggle" onclick="event.stopPropagation();toggleQuestionsPopup()" aria-label="toggle">⌃</button>
-      <button class="q-popup-close" id="q-popup-close" onclick="event.stopPropagation();closeQuestionsPopup()" aria-label="close" title="팝업 닫기">×</button>
+      <button class="q-popup-close" id="q-popup-close" onclick="event.stopPropagation();closeQuestionsPopup()" aria-label="close" title="작게 보기">×</button>
     </div>
     <div class="q-popup-list" id="q-list"></div>
   </div>
@@ -2819,6 +2818,8 @@ function setDotsBg(bg) {
     cp.style.display = '';
     d3.select(canvas).style('display', 'none');
     redrawCartogram();
+    // 지도는 화면을 넓게 쓰는 게 좋으니 질문 팝업은 자동으로 작게
+    document.getElementById('q-popup')?.classList.add('closed');
     // 자치구 프레임 페이드인 — 트리맵 차오름과 동일한 분위기
     if (typeof cartoSvg !== 'undefined' && cartoSvg) {
       const cells = cartoSvg.selectAll('.carto-cell');
@@ -4180,21 +4181,12 @@ function renderQuestions() {
     const q = list[idx];
     return `
       <button class="q-card ${cardClass}" data-q="${idx}" data-slot="${slot}">
-        <span class="q-card-x" role="button" tabindex="0" aria-label="${skipLabel}" title="${skipLabel}">↻</span>
         <span class="q-tag">${q.tag}</span>
         <span class="q-text">${q.text}</span>
       </button>`;
   }).join('');
   wrap.querySelectorAll('.q-card').forEach(card => {
-    const slot = parseInt(card.dataset.slot);
     const idx = parseInt(card.dataset.q);
-    const xBtn = card.querySelector('.q-card-x');
-    if (xBtn) {
-      xBtn.addEventListener('click', (ev) => { ev.stopPropagation(); skipQuestion(slot); });
-      xBtn.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.stopPropagation(); skipQuestion(slot); }
-      });
-    }
     card.onclick = () => applyQuestion(idx);
   });
 }
@@ -5181,16 +5173,22 @@ buildViz();
 loadCartoPaths().then(() => buildCartogram());
 // URL ?layers=...&view=... 파라미터로 들어오면 상태 복원
 applyUrlState();
-// 사이드바 폭만큼 app-frame에 우측 패딩을 줘서 main이 화면 중앙에 오게.
-// JS가 실측하므로 어떤 환경에서도 정확.
+// 사이드바는 fixed. app-frame의 좌/우 패딩에 사이드바 폭을 똑같이 주면 main이
+// 정확히 화면 중앙에 오게 된다. JS 실측 → 환경 무관.
 function syncSidebarBalance() {
   const sb = document.querySelector('.sidebar');
   const af = document.querySelector('.app-frame');
   const chart = document.getElementById('chart-area');
-  if (chart) chart.style.transform = '';  // 이전 트라이의 잔재 제거
+  if (chart) chart.style.transform = '';
   if (!sb || !af) return;
-  if (window.innerWidth <= 580) { af.style.paddingRight = '0px'; return; }
-  af.style.paddingRight = sb.offsetWidth + 'px';
+  if (window.innerWidth <= 580) {
+    af.style.paddingLeft = '0px';
+    af.style.paddingRight = '0px';
+    return;
+  }
+  const w = sb.offsetWidth + 'px';
+  af.style.paddingLeft = w;
+  af.style.paddingRight = w;
 }
 syncSidebarBalance();
 window.addEventListener('resize', syncSidebarBalance);
