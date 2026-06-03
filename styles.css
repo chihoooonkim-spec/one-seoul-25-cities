@@ -1062,6 +1062,10 @@ body > .app-frame > .sidebar, body > .app-frame > .main { border-radius: 2px; }
   align-items: stretch;
   justify-content: stretch;
   background: #eceae5;
+  /* 정사각형 콘텐츠 영역이 main 안에서 가로 중앙 (= viewport 중앙) */
+  width: 100%;
+  max-width: calc(100vh - 80px);
+  align-self: center;
   min-height: 0;
   min-width: 0;
   gap: 0;

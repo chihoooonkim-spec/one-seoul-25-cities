@@ -5173,22 +5173,43 @@ buildViz();
 loadCartoPaths().then(() => buildCartogram());
 // URL ?layers=...&view=... 파라미터로 들어오면 상태 복원
 applyUrlState();
-// 사이드바는 fixed. app-frame의 좌/우 패딩에 사이드바 폭을 똑같이 주면 main이
-// 정확히 화면 중앙에 오게 된다. JS 실측 → 환경 무관.
+// 사이드바는 좌측 fixed (네비). main은 화면 전체를 차지 → SVG 정사각형 콘텐츠가
+// preserveAspectRatio xMidYMid meet으로 viewport 정확히 중앙에 놓인다.
+// padding 방식은 main을 좁혀 콘텐츠가 중앙에서 어긋나게 만들어 폐기.
 function syncSidebarBalance() {
   const sb = document.querySelector('.sidebar');
   const af = document.querySelector('.app-frame');
   const chart = document.getElementById('chart-area');
   if (chart) chart.style.transform = '';
   if (!sb || !af) return;
+  // app-frame은 flex 유지. 사이드바를 fixed로 빼면 flex flow에서 빠져서
+  // main이 flex:1 → 화면 전체 폭을 차지하게 된다.
+  af.style.display = 'flex';
+  af.style.paddingLeft = '0px';
+  af.style.paddingRight = '0px';
+  af.style.boxSizing = 'border-box';
   if (window.innerWidth <= 580) {
-    af.style.paddingLeft = '0px';
-    af.style.paddingRight = '0px';
+    sb.style.position = 'static';
+    sb.style.width = '100%';
+    sb.style.left = sb.style.top = sb.style.bottom = '';
     return;
   }
-  const w = sb.offsetWidth + 'px';
-  af.style.paddingLeft = w;
-  af.style.paddingRight = w;
+  sb.style.position = 'fixed';
+  sb.style.top = '12px';
+  sb.style.left = '12px';
+  sb.style.bottom = '12px';
+  sb.style.zIndex = '30';
+  sb.style.boxSizing = 'border-box';
+  // chart-area를 viewport 중앙 정사각 영역으로 강제 (CSS 캐시 무관)
+  // flex:1 은 유지(세로 stretch). 가로만 max-width + align-self center 로 좁힘.
+  if (chart) {
+    const size = Math.min(window.innerHeight - 80, 1100) + 'px';
+    chart.style.maxWidth = size;
+    chart.style.width = size;
+    chart.style.alignSelf = 'center';
+    chart.style.margin = '0 auto';
+    chart.style.flex = '1 1 0';
+  }
 }
 syncSidebarBalance();
 window.addEventListener('resize', syncSidebarBalance);
