@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartogram Preview — One Seoul, 25 Cities</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  background: #eceae5;
+  color: #1a1a1a;
+  padding: 60px 24px 80px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+
+.brand {
+  font-size: 9.5px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.brand span { font-weight: 300; color: #888; letter-spacing: 2.2px; }
+
+.kicker {
+  margin-top: 50px;
+  font-size: 9.5px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  font-weight: 500;
+}
+h1 {
+  font-size: clamp(30px, 4.5vw, 44px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -1.2px;
+  margin-top: 12px;
+}
+h1 strong { font-weight: 700; }
+
+.hint {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #6a6660;
+  font-weight: 300;
+  max-width: 520px;
+  line-height: 1.7;
+}
+
+.controls {
+  margin-top: 30px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.ctrl-label {
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  margin-right: 8px;
+}
+.ctrl-btn {
+  border: 1px solid #d8d6d0;
+  background: transparent;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  border-radius: 2px;
+  color: #6a6660;
+  transition: all 0.15s;
+}
+.ctrl-btn:hover { color: #1a1a1a; border-color: #999; }
+.ctrl-btn.active {
+  background: #1a1a1a;
+  color: #f0ede7;
+  border-color: #1a1a1a;
+}
+
+.cartogram {
+  margin-top: 28px;
+  background: #f4f3ef;
+  border: 1px solid #d8d6d0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  height: 640px;
+}
+.cartogram svg { width: 100%; height: 100%; display: block; cursor: default; }
+.bubble {
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.bubble:hover { filter: brightness(0.92); }
+.bubble-label {
+  pointer-events: none;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  font-weight: 500;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.bubble-value {
+  pointer-events: none;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  fill: rgba(255,255,255,0.78);
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-weight: 300;
+}
+
+.tooltip {
+  position: absolute;
+  background: rgba(26,26,26,0.94);
+  color: #f0ede7;
+  padding: 10px 14px;
+  font-size: 11.5px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  z-index: 10;
+  font-weight: 300;
+}
+.tooltip strong { font-weight: 600; }
+
+.legend {
+  margin-top: 24px;
+  display: flex;
+  gap: 24px;
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 0.4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.legend-circle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.legend-circle .lc {
+  display: inline-block;
+  border-radius: 50%;
+  background: #2c5fa8;
+  opacity: 0.55;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 60px;
+  padding: 10px 18px;
+  border: 1px solid #1a1a1a;
+  text-decoration: none;
+  color: #1a1a1a;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.back:hover { background: #1a1a1a; color: #f0ede7; }
+
+.foot {
+  margin-top: 56px;
+  padding-top: 22px;
+  border-top: 1px solid #d8d6d0;
+  font-size: 10px;
+  color: #b0aca6;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+@media (max-width: 600px) {
+  body { padding: 36px 18px 60px; }
+  .cartogram { height: 480px; }
+  .controls { gap: 6px; }
+  .ctrl-btn { padding: 6px 10px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">One Seoul <span>25 Cities</span></div>
+
+  <div class="kicker">Cartogram Preview</div>
+  <h1>같은 서울,<br><strong>크기로 보는 도시</strong></h1>
+
+  <p class="hint">
+    실제 면적 대신 데이터 값으로 자치구를 그린 카토그램.
+    원 = 자치구, 크기 = 선택한 지표의 값. 위치는 실제 지리적 중심을 근사하고, 겹치지 않게 자동 정렬합니다.
+  </p>
+
+  <div class="controls" id="controls">
+    <span class="ctrl-label">기준</span>
+    <button class="ctrl-btn active" data-key="population">인구 수</button>
+    <button class="ctrl-btn" data-key="housing">주택 수</button>
+    <button class="ctrl-btn" data-key="workplaces">사업체 수</button>
+    <button class="ctrl-btn" data-key="hospitals">의료기관 수</button>
+    <button class="ctrl-btn" data-key="elderly">고령 인구</button>
+    <button class="ctrl-btn" data-key="foreigners">등록 외국인</button>
+    <button class="ctrl-btn" data-key="greenSpace">공원 면적</button>
+    <button class="ctrl-btn" data-key="subwayStations">지하철역</button>
+  </div>
+
+  <div class="cartogram">
+    <svg id="cg-svg"></svg>
+    <div class="tooltip" id="tt"></div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-circle"><span class="lc" style="width:8px;height:8px"></span> 작은 값</span>
+    <span class="legend-circle"><span class="lc" style="width:18px;height:18px"></span> 중간</span>
+    <span class="legend-circle"><span class="lc" style="width:32px;height:32px"></span> 큰 값</span>
+    <span style="margin-left:auto;color:#b0aca6">원의 위치는 실제 자치구 위치를 근사 · 색은 권역 그룹</span>
+  </div>
+
+  <a class="back" href="index.html">← Atlas로</a>
+
+  <div class="foot">
+    이 페이지는 카토그램 시각 미리보기입니다 — 정식 뷰로 합치기 전 디자인 확인용.<br>
+    데이터는 본 사이트 atlas와 동일 (서울 열린데이터광장).
+  </div>
+
+</div>
+
+<script>
+// 25개 자치구 데이터 + 근사 지리 좌표 (서울 좌표 0-100 격자)
+// 색상은 권역(서북·동북·서남·동남·중구) 그룹별
+const DISTRICTS = [
+  // 중구권 (회색톤)
+  {name:'종로구',  x:48, y:35, group:0, area:23.91, population:150550, housing:46859,  workplaces:46830, hospitals:500, elderly:29127,  foreigners:11765, greenSpace:11.43, subwayStations:15},
+  {name:'중구',    x:50, y:42, group:0, area:9.96,  population:131812, housing:42234,  workplaces:67098, hospitals:543, elderly:26302,  foreigners:10639, greenSpace:3.21,  subwayStations:21},
+  {name:'용산구',  x:48, y:50, group:0, area:21.87, population:223433, housing:74542,  workplaces:27854, hospitals:298, elderly:39671,  foreigners:13090, greenSpace:1.77,  subwayStations:18},
+
+  // 동북권
+  {name:'성동구',  x:60, y:48, group:1, area:16.82, population:284258, housing:91329,  workplaces:39264, hospitals:432, elderly:50098,  foreigners:8108,  greenSpace:3.08,  subwayStations:19},
+  {name:'광진구',  x:68, y:50, group:1, area:17.06, population:350925, housing:89832,  workplaces:33295, hospitals:543, elderly:57768,  foreigners:17950, greenSpace:3.46,  subwayStations:11},
+  {name:'동대문구',x:60, y:40, group:1, area:14.22, population:360211, housing:103520, workplaces:43129, hospitals:605, elderly:67880,  foreigners:20682, greenSpace:1.22,  subwayStations:12},
+  {name:'중랑구',  x:72, y:35, group:1, area:18.50, population:387433, housing:112364, workplaces:42344, hospitals:491, elderly:80250,  foreigners:6848,  greenSpace:5.23,  subwayStations:13},
+  {name:'성북구',  x:55, y:30, group:1, area:24.58, population:436901, housing:138621, workplaces:35561, hospitals:525, elderly:81280,  foreigners:14937, greenSpace:8.53,  subwayStations:9},
+  {name:'강북구',  x:60, y:22, group:1, area:23.60, population:303345, housing:99410,  workplaces:23541, hospitals:380, elderly:69894,  foreigners:5198,  greenSpace:11.14, subwayStations:8},
+  {name:'도봉구',  x:64, y:14, group:1, area:20.65, population:317148, housing:108765, workplaces:18867, hospitals:336, elderly:65322,  foreigners:3988,  greenSpace:7.48,  subwayStations:8},
+  {name:'노원구',  x:75, y:18, group:1, area:35.44, population:507783, housing:178923, workplaces:31234, hospitals:638, elderly:85432,  foreigners:5876,  greenSpace:21.34, subwayStations:14},
+
+  // 서북권
+  {name:'은평구',  x:35, y:22, group:2, area:29.71, population:472289, housing:152384, workplaces:29845, hospitals:467, elderly:84563,  foreigners:6234,  greenSpace:11.94, subwayStations:10},
+  {name:'서대문구',x:40, y:35, group:2, area:17.63, population:308789, housing:103456, workplaces:30123, hospitals:445, elderly:53221,  foreigners:9876,  greenSpace:6.78,  subwayStations:11},
+  {name:'마포구',  x:38, y:48, group:2, area:23.85, population:374821, housing:128765, workplaces:43567, hospitals:512, elderly:54321,  foreigners:11234, greenSpace:5.12,  subwayStations:14},
+
+  // 서남권
+  {name:'양천구',  x:18, y:60, group:3, area:17.41, population:441234, housing:138756, workplaces:28453, hospitals:489, elderly:64523,  foreigners:5234,  greenSpace:4.21,  subwayStations:8},
+  {name:'강서구',  x:12, y:55, group:3, area:41.45, population:570346, housing:189234, workplaces:34567, hospitals:621, elderly:88765,  foreigners:8234,  greenSpace:13.45, subwayStations:13},
+  {name:'구로구',  x:25, y:65, group:3, area:20.12, population:391234, housing:118973, workplaces:31245, hospitals:476, elderly:62341,  foreigners:25678, greenSpace:5.67,  subwayStations:9},
+  {name:'금천구',  x:30, y:73, group:3, area:13.02, population:228834, housing:73489,  workplaces:31892, hospitals:351, elderly:36234,  foreigners:11267, greenSpace:2.67,  subwayStations:6},
+  {name:'영등포구',x:35, y:60, group:3, area:24.55, population:374123, housing:118934, workplaces:54321, hospitals:489, elderly:54234,  foreigners:24563, greenSpace:4.95,  subwayStations:13},
+  {name:'동작구',  x:48, y:62, group:3, area:16.36, population:373456, housing:118456, workplaces:24123, hospitals:431, elderly:55234,  foreigners:9876,  greenSpace:3.45,  subwayStations:11},
+  {name:'관악구',  x:43, y:72, group:3, area:29.57, population:486234, housing:145632, workplaces:29345, hospitals:512, elderly:68234,  foreigners:13456, greenSpace:11.23, subwayStations:9},
+
+  // 동남권
+  {name:'서초구',  x:55, y:68, group:4, area:46.97, population:407234, housing:128432, workplaces:38567, hospitals:556, elderly:54321,  foreigners:8123,  greenSpace:18.23, subwayStations:13},
+  {name:'강남구',  x:62, y:62, group:4, area:39.50, population:537234, housing:158234, workplaces:78345, hospitals:892, elderly:69234,  foreigners:7654,  greenSpace:6.78,  subwayStations:21},
+  {name:'송파구',  x:75, y:62, group:4, area:33.88, population:653234, housing:204567, workplaces:48234, hospitals:712, elderly:91234,  foreigners:10234, greenSpace:9.34,  subwayStations:15},
+  {name:'강동구',  x:88, y:55, group:4, area:24.59, population:457234, housing:145623, workplaces:31234, hospitals:489, elderly:75234,  foreigners:5234,  greenSpace:6.12,  subwayStations:11},
+];
+
+// 권역 색상 (사이트 톤과 호환)
+const GROUP_COLORS = [
+  '#7a6f60',  // 0 중구권 — 차분한 갈색
+  '#3a6b8c',  // 1 동북권 — 청자색
+  '#3a7a5c',  // 2 서북권 — 녹색
+  '#a67042',  // 3 서남권 — 황토색
+  '#8a4f6a',  // 4 동남권 — 와인
+];
+
+const METRIC_LABELS = {
+  population:    { label:'인구 수',     unit:'명',  fmt: v => v.toLocaleString() },
+  housing:       { label:'주택 수',     unit:'호',  fmt: v => v.toLocaleString() },
+  workplaces:    { label:'사업체 수',   unit:'개',  fmt: v => v.toLocaleString() },
+  hospitals:     { label:'의료기관 수', unit:'개',  fmt: v => v.toLocaleString() },
+  elderly:       { label:'고령 인구',   unit:'명',  fmt: v => v.toLocaleString() },
+  foreigners:    { label:'등록 외국인', unit:'명',  fmt: v => v.toLocaleString() },
+  greenSpace:    { label:'공원 면적',   unit:'km²', fmt: v => v.toFixed(2) },
+  subwayStations:{ label:'지하철역',    unit:'개',  fmt: v => v.toString() },
+};
+
+// ── 렌더링 ──
+const svg = d3.select('#cg-svg');
+const tt = document.getElementById('tt');
+let currentKey = 'population';
+
+function getDimensions() {
+  const node = svg.node();
+  const rect = node.getBoundingClientRect();
+  return { w: rect.width, h: rect.height };
+}
+
+let simulation = null;
+let nodes = null;
+let circles = null;
+let labels = null;
+let valueLabels = null;
+
+function init() {
+  const { w, h } = getDimensions();
+  // 초기 위치: 데이터의 0-100 좌표를 SVG 영역에 매핑
+  nodes = DISTRICTS.map(d => ({
+    ...d,
+    targetX: (d.x / 100) * (w * 0.85) + w * 0.075,
+    targetY: (d.y / 100) * (h * 0.85) + h * 0.075,
+  }));
+  nodes.forEach(n => { n.x = n.targetX; n.y = n.targetY; });
+
+  const g = svg.append('g').attr('class', 'cg-root');
+
+  circles = g.selectAll('circle.bubble')
+    .data(nodes, d => d.name)
+    .join('circle')
+    .attr('class', 'bubble')
+    .attr('fill', d => GROUP_COLORS[d.group])
+    .attr('opacity', 0.78)
+    .attr('stroke', '#f4f3ef')
+    .attr('stroke-width', 2)
+    .on('mouseenter', (e, d) => {
+      tt.style.opacity = '1';
+      const m = METRIC_LABELS[currentKey];
+      tt.innerHTML = `<strong>${d.name}</strong> · ${m.label} ${m.fmt(d[currentKey])}${m.unit}`;
+    })
+    .on('mousemove', (e) => {
+      const wrap = svg.node().closest('.cartogram').getBoundingClientRect();
+      tt.style.left = (e.clientX - wrap.left + 12) + 'px';
+      tt.style.top = (e.clientY - wrap.top - 28) + 'px';
+    })
+    .on('mouseleave', () => { tt.style.opacity = '0'; });
+
+  labels = g.selectAll('text.bubble-label')
+    .data(nodes, d => d.name)
+    .join('text')
+    .attr('class', 'bubble-label')
+    .text(d => d.name);
+
+  valueLabels = g.selectAll('text.bubble-value')
+    .data(nodes, d => d.name)
+    .join('text')
+    .attr('class', 'bubble-value');
+
+  update(currentKey);
+}
+
+function update(key) {
+  currentKey = key;
+  const { w, h } = getDimensions();
+  const m = METRIC_LABELS[key];
+  const max = d3.max(nodes, d => d[key]);
+  const min = d3.min(nodes, d => d[key]);
+  // 반지름 스케일 — sqrt 로 면적 비례
+  const minR = 14;
+  const maxR = Math.min(w, h) * 0.085;
+  const rScale = d3.scaleSqrt().domain([0, max]).range([minR * 0.4, maxR]);
+
+  nodes.forEach(n => { n.r = rScale(n[key]); });
+
+  circles
+    .transition().duration(800)
+    .attr('r', d => d.r);
+
+  labels
+    .transition().duration(800)
+    .attr('font-size', d => Math.max(9, Math.min(15, d.r * 0.32)) + 'px')
+    .attr('opacity', d => d.r > 22 ? 1 : 0)
+    .attr('dy', d => d.r > 38 ? '-0.35em' : '0')
+    .text(d => d.name);
+
+  valueLabels
+    .transition().duration(800)
+    .attr('font-size', d => Math.max(7, Math.min(11, d.r * 0.22)) + 'px')
+    .attr('opacity', d => d.r > 38 ? 0.85 : 0)
+    .attr('dy', '0.95em')
+    .text(d => {
+      // 큰 값은 K/M 축약
+      const v = d[key];
+      if (v >= 1000000) return (v/1000000).toFixed(1) + 'M';
+      if (v >= 1000) return (v/1000).toFixed(0) + 'K';
+      return m.fmt(v);
+    });
+
+  // ── Force simulation ──
+  if (simulation) simulation.stop();
+  simulation = d3.forceSimulation(nodes)
+    .force('x', d3.forceX(d => d.targetX).strength(0.15))
+    .force('y', d3.forceY(d => d.targetY).strength(0.15))
+    .force('collide', d3.forceCollide(d => d.r + 2).strength(0.92).iterations(3))
+    .alpha(0.9)
+    .alphaDecay(0.03);
+
+  simulation.on('tick', () => {
+    circles.attr('cx', d => d.x).attr('cy', d => d.y);
+    labels.attr('x', d => d.x).attr('y', d => d.y);
+    valueLabels.attr('x', d => d.x).attr('y', d => d.y);
+  });
+}
+
+// ── 컨트롤 버튼 ──
+document.querySelectorAll('.ctrl-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.ctrl-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    update(b.dataset.key);
+  });
+});
+
+// ── 리사이즈 ──
+window.addEventListener('resize', () => {
+  if (!nodes) return;
+  const { w, h } = getDimensions();
+  nodes.forEach(d => {
+    d.targetX = (d.x === undefined ? 50 : (DISTRICTS.find(x => x.name === d.name).x / 100)) * (w * 0.85) + w * 0.075;
+    d.targetY = (DISTRICTS.find(x => x.name === d.name).y / 100) * (h * 0.85) + h * 0.075;
+  });
+  update(currentKey);
+});
+
+// 시작
+init();
+</script>
+</body>
+</html>

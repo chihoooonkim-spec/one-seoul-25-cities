@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wall — One Seoul, 25 Cities</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  background: #eceae5;
+  color: #1a1a1a;
+  line-height: 1.7;
+  padding: 64px 24px 100px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+}
+.brand {
+  font-size: 9.5px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.brand span { font-weight: 300; color: #888; letter-spacing: 2.2px; }
+
+.kicker {
+  margin-top: 88px;
+  font-size: 9.5px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  font-weight: 500;
+}
+h1 {
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+  margin-top: 14px;
+  color: #1a1a1a;
+}
+h1 strong { font-weight: 700; }
+
+.intro {
+  margin-top: 36px;
+  font-size: 14px;
+  color: #6a6660;
+  font-weight: 300;
+  max-width: 540px;
+  line-height: 1.85;
+}
+
+.form-wrap {
+  margin-top: 56px;
+  padding: 28px;
+  background: #f4f3ef;
+  border: 1px solid #d8d6d0;
+  border-radius: 4px;
+}
+.form-label {
+  font-size: 9.5px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: block;
+}
+.form-state {
+  font-size: 11px;
+  color: #555;
+  word-break: break-all;
+  margin-bottom: 22px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #fff;
+  padding: 10px 12px;
+  border: 1px solid #e4e2dc;
+  border-radius: 2px;
+  line-height: 1.5;
+}
+.form-state.empty {
+  color: #b0aca6;
+  font-style: italic;
+  font-family: inherit;
+}
+.form-textarea {
+  width: 100%;
+  min-height: 110px;
+  border: 1px solid #d8d6d0;
+  background: #fff;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 300;
+  color: #1a1a1a;
+  resize: vertical;
+  border-radius: 2px;
+  line-height: 1.6;
+}
+.form-textarea:focus { outline: none; border-color: #1a1a1a; }
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  align-items: center;
+}
+.form-author {
+  flex: 1;
+  border: 1px solid #d8d6d0;
+  background: #fff;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #1a1a1a;
+  border-radius: 2px;
+}
+.form-author:focus { outline: none; border-color: #1a1a1a; }
+.form-submit {
+  padding: 10px 22px;
+  border: 1px solid #1a1a1a;
+  background: #1a1a1a;
+  color: #f0ede7;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+.form-submit:hover:not(:disabled) { background: #2a2724; }
+.form-submit:disabled { opacity: 0.45; cursor: default; }
+.form-status {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #6a6660;
+  min-height: 1em;
+}
+.form-status.error { color: #b04a3a; }
+.form-status.success { color: #4a7a3a; }
+
+.list-header {
+  margin-top: 72px;
+  font-size: 9.5px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #b0aca6;
+  font-weight: 500;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d8d6d0;
+}
+
+.list {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: #f4f3ef;
+  border: 1px solid #d8d6d0;
+  padding: 22px 22px 18px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.card-comment {
+  font-size: 14px;
+  font-weight: 300;
+  color: #2a2724;
+  line-height: 1.7;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.card-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 9.5px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #888;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid #d8d6d0;
+  padding-bottom: 2px;
+  align-self: flex-start;
+  transition: all 0.15s;
+}
+.card-link:hover { color: #1a1a1a; border-color: #1a1a1a; }
+.card-meta {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: #888;
+}
+.card-author { font-weight: 500; color: #6a6660; }
+
+.empty {
+  margin-top: 28px;
+  text-align: center;
+  color: #b0aca6;
+  font-size: 13px;
+  font-weight: 300;
+  padding: 40px 20px;
+  grid-column: 1/-1;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 76px;
+  padding: 10px 18px;
+  border: 1px solid #1a1a1a;
+  background: transparent;
+  color: #1a1a1a;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.back:hover { background: #1a1a1a; color: #f0ede7; }
+
+.foot {
+  margin-top: 64px;
+  padding-top: 22px;
+  border-top: 1px solid #d8d6d0;
+  font-size: 10px;
+  color: #b0aca6;
+  font-weight: 300;
+  letter-spacing: 0.4px;
+  line-height: 1.8;
+}
+
+@media (max-width: 600px) {
+  body { padding: 36px 18px 60px; }
+  .form-wrap { padding: 20px; }
+  .form-row { flex-direction: column; align-items: stretch; }
+  .form-submit { width: 100%; }
+  .list { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">One Seoul <span>25 Cities</span></div>
+
+  <div class="kicker">Wall — 사람들의 발견</div>
+  <h1>같은 서울,<br><strong>다른 시선</strong></h1>
+
+  <p class="intro">
+    각자의 그래프와 함께, 서울에 대해 발견한 패턴이나 인사이트를 짧게 남겨주세요.
+    데이터가 답이 아니라 질문이듯, 여기 적힌 것들 또한 또 다른 시선의 시작점이 됩니다.
+  </p>
+
+  <div class="form-wrap">
+    <span class="form-label">현재 그래프 상태</span>
+    <div class="form-state" id="state-display"></div>
+
+    <span class="form-label">발견한 것 (최대 500자)</span>
+    <textarea
+      class="form-textarea"
+      id="comment"
+      maxlength="500"
+      placeholder="예: 강남구는 학원이 많지만 공원 면적은 적다 / 서울 동쪽이 의외로 녹지가 풍부하다…"></textarea>
+
+    <div class="form-row">
+      <input
+        class="form-author"
+        id="author"
+        type="text"
+        maxlength="30"
+        placeholder="이름 (선택, 비우면 익명)">
+      <button class="form-submit" id="submit-btn">남기기</button>
+    </div>
+
+    <div class="form-status" id="form-status"></div>
+  </div>
+
+  <div class="list-header">최근 발견</div>
+  <div class="list" id="insights-list">
+    <div class="empty">불러오는 중…</div>
+  </div>
+
+  <a class="back" href="index.html">← Atlas로</a>
+
+  <div class="foot">
+    One Seoul, 25 Cities · 서울 25개 자치구 데이터 아틀라스<br>
+    여기 남은 글은 누구나 볼 수 있습니다. 무리한 표현·개인정보·광고는 삼가주세요.<br>
+    © 2026 김치훈. — Licensed CC BY-NC-ND 4.0
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL  = 'https://qjjmidlbgkjskwsexvsp.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqam1pZGxiZ2tqc2t3c2V4dnNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NTM1ODYsImV4cCI6MjA5MzMyOTU4Nn0.NYmhe9E7Xyot0BqIk0vmeI8kWf8qStUarPCYcML7MAs';
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── 현재 그래프 상태 (메인 index.html 에서 ?from=... 으로 전달받음) ──
+const params      = new URLSearchParams(location.search);
+const fromUrl     = params.get('from') || '';
+const stateEl     = document.getElementById('state-display');
+
+if (fromUrl) {
+  stateEl.textContent = fromUrl;
+  stateEl.dataset.url = fromUrl;
+} else {
+  stateEl.classList.add('empty');
+  stateEl.textContent = '메인에서 [공유] 버튼으로 오면 여기에 그래프 링크가 자동으로 채워집니다 — 일반 코멘트만 남기는 것도 가능';
+  stateEl.dataset.url = '';
+}
+
+// ── 글 작성 ──
+const submitBtn = document.getElementById('submit-btn');
+const commentEl = document.getElementById('comment');
+const authorEl  = document.getElementById('author');
+const statusEl  = document.getElementById('form-status');
+
+submitBtn.addEventListener('click', async () => {
+  const comment = commentEl.value.trim();
+  const author  = authorEl.value.trim() || '익명';
+
+  if (!comment) {
+    statusEl.textContent = '발견한 내용을 적어주세요.';
+    statusEl.className = 'form-status error';
+    return;
+  }
+
+  submitBtn.disabled = true;
+  statusEl.textContent = '저장 중…';
+  statusEl.className = 'form-status';
+
+  const { error } = await sb.from('insights').insert({
+    state_url: stateEl.dataset.url || '',
+    comment,
+    author
+  });
+
+  submitBtn.disabled = false;
+
+  if (error) {
+    statusEl.textContent = '오류: ' + error.message;
+    statusEl.className = 'form-status error';
+    return;
+  }
+
+  statusEl.textContent = '남겼습니다 — 아래에 표시됩니다.';
+  statusEl.className = 'form-status success';
+  commentEl.value = '';
+  loadInsights();
+});
+
+// ── 목록 불러오기 ──
+async function loadInsights() {
+  const listEl = document.getElementById('insights-list');
+  listEl.innerHTML = '<div class="empty">불러오는 중…</div>';
+
+  const { data, error } = await sb
+    .from('insights')
+    .select('id, created_at, state_url, comment, author')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    listEl.innerHTML = `<div class="empty">불러오기 실패: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  if (!data || data.length === 0) {
+    listEl.innerHTML = '<div class="empty">아직 남긴 인사이트가 없어요. 첫 글을 남겨보세요.</div>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  for (const row of data) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const dateStr = formatDate(row.created_at);
+    const linkHtml = row.state_url
+      ? `<a class="card-link" href="${escapeAttr(row.state_url)}">이 그래프 보기 →</a>`
+      : '';
+    card.innerHTML = `
+      <div class="card-comment"></div>
+      ${linkHtml}
+      <div class="card-meta">
+        <span class="card-author"></span>
+        <span>${dateStr}</span>
+      </div>
+    `;
+    card.querySelector('.card-comment').textContent = row.comment;
+    card.querySelector('.card-author').textContent  = row.author || '익명';
+    listEl.appendChild(card);
+  }
+}
+
+function formatDate(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch (e) { return ''; }
+}
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+}
+function escapeAttr(str) { return escapeHtml(str); }
+
+loadInsights();
+</script>
+</body>
+</html>
