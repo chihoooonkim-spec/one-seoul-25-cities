@@ -5635,6 +5635,16 @@ function setDotsBg(bg) {
     cp.style.display = '';
     d3.select(canvas).style('display', 'none');
     redrawCartogram();
+    // 자치구 프레임 페이드인 — 트리맵 차오름과 동일한 분위기
+    if (typeof cartoSvg !== 'undefined' && cartoSvg) {
+      const cells = cartoSvg.selectAll('.carto-cell');
+      cells.interrupt().style('opacity', 0);
+      cells.transition()
+        .delay((d, i) => i * 18)
+        .duration(620)
+        .ease(d3.easeCubicOut)
+        .style('opacity', 1);
+    }
   } else {
     bp.style.display = '';
     cp.style.display = 'none';
@@ -7987,6 +7997,19 @@ buildViz();
 loadCartoPaths().then(() => buildCartogram());
 // URL ?layers=...&view=... 파라미터로 들어오면 상태 복원
 applyUrlState();
+// 사이드바 폭 실측 → app-frame 우측 패딩과 동기화 (main을 화면 중앙에)
+function syncSidebarBalance() {
+  const sb = document.querySelector('.sidebar');
+  const af = document.querySelector('.app-frame');
+  if (!sb || !af) return;
+  if (window.innerWidth <= 580) {
+    af.style.paddingRight = '0px';
+    return;
+  }
+  af.style.paddingRight = sb.offsetWidth + 'px';
+}
+syncSidebarBalance();
+window.addEventListener('resize', syncSidebarBalance);
 // 인라인 Wall 인사이트 목록 비동기 로드
 if (typeof loadWallList === 'function') loadWallList();
 if (typeof refreshWallStateDisplay === 'function') refreshWallStateDisplay();
